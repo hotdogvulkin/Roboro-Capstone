@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State Budget Timing Dashboard · Roboro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#0B0614;color:#F2EEF7;min-height:100vh;padding:0}
+
+.topbar{background:#0B0614;border-bottom:1px solid #2D1B4E;padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-dots{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:22px;height:22px}
+.brand-dots span{border-radius:50%}
+.brand-dots span:nth-child(1){background:#E11D52}
+.brand-dots span:nth-child(2){background:#6E6A99}
+.brand-dots span:nth-child(3){background:#6E6A99;opacity:.5}
+.brand-dots span:nth-child(4){background:#E11D52;opacity:.4}
+.brand-name{font-size:15px;font-weight:600;color:#F2EEF7;letter-spacing:-.01em}
+.brand-tag{font-size:11px;color:#9B93B5;margin-top:1px}
+.proto-badge{font-size:10px;font-weight:500;background:#2D1B4E;color:#9B93B5;padding:3px 10px;border-radius:999px;border:1px solid #3D2B5E}
+
+.page{max-width:1200px;margin:0 auto;padding:28px 32px}
+
+.hero{margin-bottom:28px}
+.hero h1{font-size:26px;font-weight:600;color:#F2EEF7;letter-spacing:-.02em;line-height:1.2;margin-bottom:6px}
+.hero p{font-size:14px;color:#9B93B5;max-width:620px;line-height:1.6}
+
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.ctrl-group{display:flex;align-items:center;gap:6px}
+.ctrl-group label{font-size:11px;color:#9B93B5;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+select{background:#1A1030;color:#F2EEF7;border:1px solid #3D2B5E;border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;cursor:pointer;outline:none}
+select:hover{border-color:#6E6A99}
+.divider{width:1px;height:20px;background:#2D1B4E}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric{background:#1A1030;border:1px solid #2D1B4E;border-radius:10px;padding:14px 16px}
+.metric-label{font-size:10px;color:#9B93B5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.metric-val{font-size:26px;font-weight:600;color:#F2EEF7;letter-spacing:-.02em;line-height:1}
+.metric-sub{font-size:11px;color:#6E6A99;margin-top:4px}
+.metric.accent{border-color:#E11D52;border-opacity:.4}
+
+.main{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start}
+
+.chart-card{background:#1A1030;border:1px solid #2D1B4E;border-radius:12px;padding:20px}
+.chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.chart-title{font-size:13px;font-weight:500;color:#F2EEF7}
+.chart-sub{font-size:11px;color:#9B93B5;margin-top:3px}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#9B93B5}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+#chart-wrap{position:relative;width:100%;height:280px}
+
+.detail-card{background:#1A1030;border:1px solid #2D1B4E;border-radius:12px;padding:20px;position:sticky;top:20px}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:10px;color:#6E6A99;text-align:center}
+.detail-empty svg{opacity:.3}
+.detail-empty p{font-size:12px;line-height:1.5}
+.detail-state{font-size:20px;font-weight:600;color:#F2EEF7;letter-spacing:-.02em;margin-bottom:2px}
+.detail-meta{font-size:11px;color:#9B93B5;margin-bottom:14px;line-height:1.5}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.03em;margin-bottom:14px}
+.badge-green{background:rgba(29,158,117,.15);color:#5DCAA5;border:1px solid rgba(29,158,117,.3)}
+.badge-amber{background:rgba(186,117,23,.15);color:#EF9F27;border:1px solid rgba(186,117,23,.3)}
+.badge-red{background:rgba(226,75,74,.15);color:#F09595;border:1px solid rgba(226,75,74,.3)}
+.detail-rows{border-top:1px solid #2D1B4E;padding-top:12px}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1E1438}
+.detail-row:last-child{border-bottom:none}
+.detail-key{font-size:12px;color:#9B93B5}
+.detail-val{font-size:12px;font-weight:500;color:#F2EEF7}
+.detail-note{margin-top:14px;font-size:11px;color:#6E6A99;line-height:1.6;padding-top:12px;border-top:1px solid #2D1B4E}
+.ask-btn{margin-top:14px;width:100%;background:transparent;border:1px solid #E11D52;color:#E11D52;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;transition:background .15s}
+.ask-btn:hover{background:rgba(225,29,82,.1)}
+
+.footer{margin-top:32px;padding-top:20px;border-top:1px solid #2D1B4E;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.footer-note{font-size:11px;color:#6E6A99}
+.footer-src{font-size:11px;color:#6E6A99}
+
+@media(max-width:768px){
+  .main{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .page{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dots">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div>
+      <div class="brand-name">Roboro</div>
+      <div class="brand-tag">Legislative intelligence</div>
+    </div>
+  </div>
+  <span class="proto-badge">Capstone prototype · Summer 2026</span>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <h1>State Budget Timing — All 50 States</h1>
+    <p>How late (or early) does each state enact its budget relative to its fiscal year start date? Filter, compare, and explore patterns across the country — powered by Roboro legislative data.</p>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>Region</label>
+      <select id="region-filter">
+        <option value="all">All regions</option>
+        <option value="Northeast">Northeast</option>
+        <option value="South">South</option>
+        <option value="Midwest">Midwest</option>
+        <option value="West">West</option>
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <label>Sort by</label>
+      <select id="sort-filter">
+        <option value="days">Days late ↓</option>
+        <option value="alpha">A – Z</option>
+        <option value="rate">On-time rate</option>
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <label>Budget cycle</label>
+      <select id="cycle-filter">
+        <option value="all">All</option>
+        <option value="annual">Annual</option>
+        <option value="biennial">Biennial</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="main">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Avg. days past fiscal year start — budget enacted (2019–2024)</div>
+          <div class="chart-sub">Below zero = enacted before the fiscal year began. Click any bar to see state detail.</div>
+        </div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#1D9E75"></div>On time</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#BA7517"></div>Moderately late</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#E24B4A"></div>Very late / no budget</div>
+        </div>
+      </div>
+      <div id="chart-wrap">
+        <canvas id="myChart" role="img" aria-label="Bar chart of average days past fiscal year start for each US state budget, 2019 to 2024. States sorted by lateness by default."></canvas>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-empty" id="detail-empty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <p>Click any bar to see<br>state detail</p>
+      </div>
+      <div id="detail-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-note">⚠ Prototype — data is seeded for demonstration. Final version will use live Roboro data.</span>
+    <span class="footer-src">Source: NCGA Legislative Library; NCSL; Roboro analysis · Grant, Summer 2026</span>
+  </div>
+</div>
+
+<script>
+const STATES=[
+  {s:"Alabama",ab:"AL",r:"South",fy:"Oct 1",cycle:"annual",avgDays:12,onTimeRate:67,vetoes:0,nobudget:0,note:"Historically reliable, mild late tendency"},
+  {s:"Alaska",ab:"AK",r:"West",fy:"Jul 1",cycle:"annual",avgDays:38,onTimeRate:33,vetoes:1,nobudget:0,note:"Frequent delays tied to oil revenue uncertainty"},
+  {s:"Arizona",ab:"AZ",r:"West",fy:"Jul 1",cycle:"annual",avgDays:55,onTimeRate:17,vetoes:2,nobudget:0,note:"Persistent late budgets, frequent veto battles"},
+  {s:"Arkansas",ab:"AR",r:"South",fy:"Jul 1",cycle:"biennial",avgDays:3,onTimeRate:83,vetoes:0,nobudget:0,note:"Generally on time; biennial system aids predictability"},
+  {s:"California",ab:"CA",r:"West",fy:"Jul 1",cycle:"annual",avgDays:-8,onTimeRate:83,vetoes:0,nobudget:0,note:"Constitutional deadline with pay penalty for legislators"},
+  {s:"Colorado",ab:"CO",r:"West",fy:"Jul 1",cycle:"annual",avgDays:-5,onTimeRate:100,vetoes:0,nobudget:0,note:"Rarely late; TABOR constraints focus negotiations early"},
+  {s:"Connecticut",ab:"CT",r:"Northeast",fy:"Jul 1",cycle:"biennial",avgDays:42,onTimeRate:33,vetoes:1,nobudget:1,note:"Recurring impasses; 2017 operated 5 months without budget"},
+  {s:"Delaware",ab:"DE",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:-3,onTimeRate:100,vetoes:0,nobudget:0,note:"Consistently on time; small, unified legislature"},
+  {s:"Florida",ab:"FL",r:"South",fy:"Jul 1",cycle:"annual",avgDays:-12,onTimeRate:100,vetoes:0,nobudget:0,note:"One of the most reliable states; strict deadline culture"},
+  {s:"Georgia",ab:"GA",r:"South",fy:"Jul 1",cycle:"annual",avgDays:-6,onTimeRate:100,vetoes:0,nobudget:0,note:"Consistently enacted before fiscal year start"},
+  {s:"Hawaii",ab:"HI",r:"West",fy:"Jul 1",cycle:"biennial",avgDays:8,onTimeRate:67,vetoes:0,nobudget:0,note:"Mild delays; island logistics add complexity"},
+  {s:"Idaho",ab:"ID",r:"West",fy:"Jul 1",cycle:"annual",avgDays:-10,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time legislature; reliably finishes early"},
+  {s:"Illinois",ab:"IL",r:"Midwest",fy:"Jul 1",cycle:"annual",avgDays:91,onTimeRate:17,vetoes:2,nobudget:2,note:"2015–2017: operated 736 days without a full budget"},
+  {s:"Indiana",ab:"IN",r:"Midwest",fy:"Jul 1",cycle:"biennial",avgDays:-4,onTimeRate:100,vetoes:0,nobudget:0,note:"Biennial system; almost always finishes on time"},
+  {s:"Iowa",ab:"IA",r:"Midwest",fy:"Jul 1",cycle:"annual",avgDays:5,onTimeRate:67,vetoes:0,nobudget:0,note:"Occasional modest delays; generally functional"},
+  {s:"Kansas",ab:"KS",r:"Midwest",fy:"Jul 1",cycle:"annual",avgDays:18,onTimeRate:50,vetoes:1,nobudget:0,note:"Tax-cut battles have caused recurring late budgets"},
+  {s:"Kentucky",ab:"KY",r:"South",fy:"Jul 1",cycle:"biennial",avgDays:7,onTimeRate:67,vetoes:0,nobudget:0,note:"Biennial system; mild delays in contested years"},
+  {s:"Louisiana",ab:"LA",r:"South",fy:"Jul 1",cycle:"annual",avgDays:1,onTimeRate:83,vetoes:0,nobudget:0,note:"Generally timely; constitutional deadline enforced"},
+  {s:"Maine",ab:"ME",r:"Northeast",fy:"Jul 1",cycle:"biennial",avgDays:22,onTimeRate:50,vetoes:1,nobudget:0,note:"Divided government leads to frequent delays"},
+  {s:"Maryland",ab:"MD",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:-4,onTimeRate:100,vetoes:0,nobudget:0,note:"Governor submits early; legislature rarely misses deadline"},
+  {s:"Massachusetts",ab:"MA",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:148,onTimeRate:0,vetoes:0,nobudget:0,note:"Chronically late; has not passed on time in decades"},
+  {s:"Michigan",ab:"MI",r:"Midwest",fy:"Oct 1",cycle:"annual",avgDays:14,onTimeRate:50,vetoes:1,nobudget:0,note:"Oct 1 FY start; partisan battles cause frequent delays"},
+  {s:"Minnesota",ab:"MN",r:"Midwest",fy:"Jul 1",cycle:"biennial",avgDays:35,onTimeRate:33,vetoes:2,nobudget:1,note:"2021 operated without budget; divided govt common"},
+  {s:"Mississippi",ab:"MS",r:"South",fy:"Jul 1",cycle:"annual",avgDays:2,onTimeRate:83,vetoes:0,nobudget:0,note:"Reliably near deadline; functional process"},
+  {s:"Missouri",ab:"MO",r:"Midwest",fy:"Jul 1",cycle:"annual",avgDays:0,onTimeRate:83,vetoes:1,nobudget:0,note:"Generally on time despite partisan friction"},
+  {s:"Montana",ab:"MT",r:"West",fy:"Jul 1",cycle:"biennial",avgDays:-8,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time biennial legislature; very reliable"},
+  {s:"Nebraska",ab:"NE",r:"Midwest",fy:"Jul 1",cycle:"biennial",avgDays:-6,onTimeRate:100,vetoes:0,nobudget:0,note:"Unicameral nonpartisan legislature; exceptionally reliable"},
+  {s:"Nevada",ab:"NV",r:"West",fy:"Jul 1",cycle:"biennial",avgDays:5,onTimeRate:83,vetoes:0,nobudget:0,note:"Biennial system; occasional overtime sessions"},
+  {s:"New Hampshire",ab:"NH",r:"Northeast",fy:"Jul 1",cycle:"biennial",avgDays:12,onTimeRate:67,vetoes:1,nobudget:0,note:"No income or sales tax complicates negotiations"},
+  {s:"New Jersey",ab:"NJ",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:4,onTimeRate:67,vetoes:1,nobudget:0,note:"Near-shutdown in 2017; generally resolves by late June"},
+  {s:"New Mexico",ab:"NM",r:"West",fy:"Jul 1",cycle:"annual",avgDays:-9,onTimeRate:100,vetoes:0,nobudget:0,note:"Short session; governor has strong veto; timely"},
+  {s:"New York",ab:"NY",r:"Northeast",fy:"Apr 1",cycle:"annual",avgDays:68,onTimeRate:17,vetoes:0,nobudget:0,note:"Apr 1 FY start; chronic lateness improved after 2010 reforms"},
+  {s:"North Carolina",ab:"NC",r:"South",fy:"Jul 1",cycle:"biennial",avgDays:52,onTimeRate:33,vetoes:3,nobudget:2,note:"2019 & 2025: no full budget enacted; 2016 continuation law"},
+  {s:"North Dakota",ab:"ND",r:"Midwest",fy:"Jul 1",cycle:"biennial",avgDays:-14,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time biennial legislature; consistently early"},
+  {s:"Ohio",ab:"OH",r:"Midwest",fy:"Jul 1",cycle:"biennial",avgDays:22,onTimeRate:33,vetoes:0,nobudget:0,note:"Biennial budgets; frequent June–July overtime"},
+  {s:"Oklahoma",ab:"OK",r:"South",fy:"Jul 1",cycle:"annual",avgDays:8,onTimeRate:67,vetoes:1,nobudget:0,note:"Oil-dependent revenue makes timing unpredictable"},
+  {s:"Oregon",ab:"OR",r:"West",fy:"Jul 1",cycle:"biennial",avgDays:14,onTimeRate:67,vetoes:0,nobudget:0,note:"Biennial system; occasional quorum walkouts"},
+  {s:"Pennsylvania",ab:"PA",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:112,onTimeRate:0,vetoes:1,nobudget:0,note:"Structurally late; has not enacted on time in decades"},
+  {s:"Rhode Island",ab:"RI",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:18,onTimeRate:50,vetoes:0,nobudget:0,note:"Moderate delays; small state, complex politics"},
+  {s:"South Carolina",ab:"SC",r:"South",fy:"Jul 1",cycle:"annual",avgDays:-3,onTimeRate:100,vetoes:0,nobudget:0,note:"Reliably on time; legislature prioritizes the budget"},
+  {s:"South Dakota",ab:"SD",r:"Midwest",fy:"Jul 1",cycle:"annual",avgDays:-15,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time legislature; passes budget months early"},
+  {s:"Tennessee",ab:"TN",r:"South",fy:"Jul 1",cycle:"annual",avgDays:-8,onTimeRate:100,vetoes:0,nobudget:0,note:"Consistently early; strong supermajority"},
+  {s:"Texas",ab:"TX",r:"South",fy:"Sep 1",cycle:"biennial",avgDays:7,onTimeRate:67,vetoes:1,nobudget:0,note:"Sep 1 FY; biennial, meets odd years only"},
+  {s:"Utah",ab:"UT",r:"West",fy:"Jul 1",cycle:"annual",avgDays:-18,onTimeRate:100,vetoes:0,nobudget:0,note:"Passes budget in February; among earliest in the country"},
+  {s:"Vermont",ab:"VT",r:"Northeast",fy:"Jul 1",cycle:"annual",avgDays:8,onTimeRate:67,vetoes:0,nobudget:0,note:"Small state; generally functional process"},
+  {s:"Virginia",ab:"VA",r:"South",fy:"Jul 1",cycle:"biennial",avgDays:2,onTimeRate:83,vetoes:0,nobudget:0,note:"Biennial; governor has amendatory veto; usually timely"},
+  {s:"Washington",ab:"WA",r:"West",fy:"Jul 1",cycle:"biennial",avgDays:9,onTimeRate:67,vetoes:0,nobudget:0,note:"Biennial system; overtime sessions common"},
+  {s:"West Virginia",ab:"WV",r:"South",fy:"Jul 1",cycle:"annual",avgDays:4,onTimeRate:83,vetoes:0,nobudget:0,note:"Generally functional; Republican supermajority since 2015"},
+  {s:"Wisconsin",ab:"WI",r:"Midwest",fy:"Jul 1",cycle:"biennial",avgDays:62,onTimeRate:17,vetoes:2,nobudget:0,note:"Frequent impasses; biennial budget often months late"},
+  {s:"Wyoming",ab:"WY",r:"West",fy:"Jul 1",cycle:"biennial",avgDays:-11,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time biennial legislature; oil revenue simplifies process"},
+];
+
+function barColor(d,n){if(n>0)return'#E24B4A';if(d<=0)return'#1D9E75';if(d<=20)return'#3B6D11';if(d<=50)return'#BA7517';if(d<=100)return'#D85A30';return'#E24B4A'}
+function badge(d,n){if(n>0)return'<span class="badge badge-red">No-budget year(s)</span>';if(d<=0)return'<span class="badge badge-green">On time</span>';if(d<=30)return'<span class="badge badge-amber">Moderately late</span>';return'<span class="badge badge-red">Chronically late</span>'}
+
+let chart,filtered=[...STATES];
+
+function getFiltered(){
+  const r=document.getElementById('region-filter').value;
+  const s=document.getElementById('sort-filter').value;
+  const c=document.getElementById('cycle-filter').value;
+  let f=STATES.filter(x=>(r==='all'||x.r===r)&&(c==='all'||x.cycle===c));
+  if(s==='days')f.sort((a,b)=>b.avgDays-a.avgDays);
+  else if(s==='alpha')f.sort((a,b)=>a.s.localeCompare(b.s));
+  else f.sort((a,b)=>a.onTimeRate-b.onTimeRate);
+  return f;
+}
+
+function updateMetrics(data){
+  const ontime=data.filter(s=>s.avgDays<=0).length;
+  const lateOnes=data.filter(s=>s.avgDays>0);
+  const avgLate=lateOnes.length?Math.round(lateOnes.reduce((a,s)=>a+s.avgDays,0)/lateOnes.length):0;
+  const nobudget=data.filter(s=>s.nobudget>0).length;
+  const vetoes=data.reduce((a,s)=>a+s.vetoes,0);
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">On time</div><div class="metric-val">${ontime}</div><div class="metric-sub">of ${data.length} states shown</div></div>
+    <div class="metric"><div class="metric-label">Avg days late</div><div class="metric-val">${avgLate}</div><div class="metric-sub">among late states only</div></div>
+    <div class="metric"><div class="metric-label">No-budget years</div><div class="metric-val">${nobudget}</div><div class="metric-sub">states with ≥1 since 2019</div></div>
+    <div class="metric"><div class="metric-label">Veto battles</div><div class="metric-val">${vetoes}</div><div class="metric-sub">budget vetoes, 2019–2024</div></div>
+  `;
+}
+
+function renderChart(data){
+  filtered=data;
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById('myChart'),{
+    type:'bar',
+    data:{labels:data.map(s=>s.ab),datasets:[{
+      data:data.map(s=>s.avgDays),
+      backgroundColor:data.map(s=>barColor(s.avgDays,s.nobudget)),
+      borderRadius:3,borderWidth:0,categoryPercentage:.88,barPercentage:.9
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#2D1B4E',titleColor:'#F2EEF7',bodyColor:'#9B93B5',
+        borderColor:'#3D2B5E',borderWidth:1,padding:10,
+        callbacks:{
+          title:items=>filtered[items[0].dataIndex].s,
+          label:item=>{const v=item.raw;return v<=0?`${Math.abs(v)} days before fiscal year`:`+${v} days past fiscal year start`}
+        }
+      }},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#9B93B5',font:{size:9.5},maxRotation:0}},
+        y:{grid:{color:'rgba(110,106,153,.15)'},ticks:{color:'#9B93B5',font:{size:10},
+          callback:v=>v===0?'FY start':(v>0?`+${v}d`:`${v}d`)}}
+      },
+      onClick:(e,els)=>{if(els.length)showDetail(filtered[els[0].index])}
+    }
+  });
+}
+
+function showDetail(state){
+  document.getElementById('detail-empty').style.display='none';
+  const d=document.getElementById('detail-content');
+  d.style.display='block';
+  d.innerHTML=`
+    <div class="detail-state">${state.s}</div>
+    <div class="detail-meta">${state.r} · ${state.cycle} budget<br>Fiscal year starts ${state.fy}</div>
+    ${badge(state.avgDays,state.nobudget)}
+    <div class="detail-rows">
+      <div class="detail-row"><span class="detail-key">Avg days past FY start</span><span class="detail-val">${state.avgDays<=0?state.avgDays+' (on time)':'+'+state.avgDays}</span></div>
+      <div class="detail-row"><span class="detail-key">On-time rate (2019–24)</span><span class="detail-val">${state.onTimeRate}%</span></div>
+      <div class="detail-row"><span class="detail-key">Budget vetoes</span><span class="detail-val">${state.vetoes}</span></div>
+      <div class="detail-row"><span class="detail-key">No-budget years</span><span class="detail-val">${state.nobudget}</span></div>
+    </div>
+    <div class="detail-note">${state.note}</div>
+  `;
+}
+
+function refresh(){
+  const data=getFiltered();
+  updateMetrics(data);
+  renderChart(data);
+  document.getElementById('detail-empty').style.display='flex';
+  document.getElementById('detail-content').style.display='none';
+}
+
+document.getElementById('region-filter').addEventListener('change',refresh);
+document.getElementById('sort-filter').addEventListener('change',refresh);
+document.getElementById('cycle-filter').addEventListener('change',refresh);
+refresh();
+</script>
+</body>
+</html>
