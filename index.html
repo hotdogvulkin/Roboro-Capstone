@@ -337,7 +337,8 @@ select:hover{border-color:#6E6A99}
         <div class="legend" id="snapshot-legend">
           <div class="leg-item"><div class="leg-dot" style="background:#1D9E75"></div>On time</div>
           <div class="leg-item"><div class="leg-dot" style="background:#BA7517"></div>Moderately late</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#E24B4A"></div>Very late / no budget</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#E24B4A"></div>Very late</div>
+          <div class="leg-item"><div class="leg-dot" style="background:transparent;border:2px solid #E24B4A"></div>Has a no-budget year</div>
         </div>
         <div class="legend heat-legend" id="trend-legend" style="display:none">
           <span>Early / on time</span>
@@ -1687,7 +1688,14 @@ function showStateDetail(name){
   d.querySelector('#unit-real')?.addEventListener('click',()=>setSpendingUnit('real'));
 }
 
-function barColor(d,n){if(n>0)return'#E24B4A';if(d<=0)return'#1D9E75';if(d<=20)return'#3B6D11';if(d<=50)return'#BA7517';if(d<=100)return'#D85A30';return'#E24B4A'}
+// Fill encodes timing and nothing else, so a bar's colour always agrees with its height.
+// This used to short-circuit to red whenever a state had a no-budget year, which meant
+// Michigan — the third-earliest state in the Midwest at -63 days — rendered the same red
+// as a chronic misser, and a genuinely late state was indistinguishable from one carrying
+// a single failed year. The no-budget flag moved to the bar's outline instead: still
+// unmissable, but on its own channel rather than overwriting the average.
+function barColor(d){if(d<=0)return'#1D9E75';if(d<=20)return'#3B6D11';if(d<=50)return'#BA7517';if(d<=100)return'#D85A30';return'#E24B4A'}
+const NOBUDGET_OUTLINE='#E24B4A';
 function badge(d,n){if(n>0)return'<span class="badge badge-red">No-budget year(s)</span>';if(d<=0)return'<span class="badge badge-green">On time</span>';if(d<=30)return'<span class="badge badge-amber">Moderately late</span>';return'<span class="badge badge-red">Chronically late</span>'}
 
 // Snapshot is the landing view: it orients someone across all 50 states before asking them
@@ -1730,8 +1738,13 @@ function renderChart(data){
     type:'bar',
     data:{labels:data.map(s=>s.ab),datasets:[{
       data:data.map(s=>s.avgDays),
-      backgroundColor:data.map(s=>barColor(s.avgDays,s.nobudget)),
-      borderRadius:3,borderWidth:0,categoryPercentage:.88,barPercentage:.9
+      backgroundColor:data.map(s=>barColor(s.avgDays)),
+      // Outline carries the no-budget flag. Chart.js draws the border inside the bar, so
+      // on a short bar a thick one would swallow the fill — 2px reads clearly without
+      // obscuring the timing colour underneath.
+      borderColor:data.map(s=>s.nobudget>0?NOBUDGET_OUTLINE:'transparent'),
+      borderWidth:data.map(s=>s.nobudget>0?2:0),
+      borderRadius:3,categoryPercentage:.88,barPercentage:.9
     }]},
     options:{
       responsive:true,maintainAspectRatio:false,
@@ -1740,7 +1753,16 @@ function renderChart(data){
         borderColor:'#3D2B5E',borderWidth:1,padding:10,
         callbacks:{
           title:items=>filtered[items[0].dataIndex].s,
-          label:item=>{const v=item.raw;return v<=0?`${Math.abs(v)} days before fiscal year`:`+${v} days past fiscal year start`}
+          label:item=>{const v=item.raw;return v<=0?`${Math.abs(v)} days before fiscal year`:`+${v} days past fiscal year start`},
+          // Name the years rather than leaving the outline to be guessed at. A state can
+          // average early and still have failed outright once, and that is the whole
+          // reason these two facts now sit on separate channels.
+          afterLabel:item=>{
+            const st=filtered[item.dataIndex];
+            if(!st.nobudget)return'';
+            const yrs=(BY_STATE[st.s]||[]).filter(r=>!r.carryover&&!r.enacted).map(r=>r.fy);
+            return`\nNo budget enacted: ${yrs.join(', ')}`;
+          }
         }
       }},
       scales:{
