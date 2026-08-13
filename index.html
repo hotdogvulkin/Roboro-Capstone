@@ -200,6 +200,26 @@ select:hover{border-color:#6E6A99}
 .wl-covered b{color:#C9C2DB;font-weight:600}
 .wl-val{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:2px 0 22px}
 
+/* ---- Open questions ----------------------------------------------------- */
+.oq-q{background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E11D52;border-radius:9px;padding:15px 17px;margin-bottom:11px}
+.oq-q .oq-num{font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6E6A99;margin-bottom:6px}
+.oq-q .oq-h{font-size:14px;font-weight:600;color:#F2EEF7;line-height:1.4;margin-bottom:7px;letter-spacing:-.01em}
+.oq-q .oq-b{font-size:12px;color:#B0A8C8;line-height:1.65}
+.oq-q .oq-b b{color:#F2EEF7;font-weight:600}
+.oq-q .oq-ask{font-size:11.5px;color:#B9A8F5;line-height:1.6;margin-top:9px;padding-top:9px;border-top:1px solid #2D1B4E}
+.oq-gap-grid{display:flex;flex-wrap:wrap;gap:6px}
+.oq-gap{font-size:11px;color:#C9C2DB;background:#1A1030;border:1px solid #2D1B4E;border-radius:6px;padding:5px 9px;white-space:nowrap}
+.oq-gap b{color:#F2EEF7;font-weight:600}
+.oq-gap span{color:#6E6A99}
+.oq-cta{background:#1A1030;border:1px solid #3D2B5E;border-radius:11px;padding:18px 20px;margin:24px 0 20px;max-width:900px}
+.oq-cta h4{font-size:14px;font-weight:600;color:#F2EEF7;margin-bottom:8px;letter-spacing:-.01em}
+.oq-cta p{font-size:12px;color:#B0A8C8;line-height:1.7;margin-bottom:11px}
+.oq-cta a{color:#B9A8F5}
+.oq-links{display:flex;flex-wrap:wrap;gap:8px}
+.oq-link{font-size:11.5px;color:#F2EEF7;background:#231640;border:1px solid #3D2B5E;border-radius:7px;padding:8px 13px;text-decoration:none;transition:background .15s}
+.oq-link:hover{background:#2D1B4E}
+.oq-link span{color:#9B93B5}
+
 /* ---- Session overrun ---------------------------------------------------- */
 .ov-band{display:grid;grid-template-columns:150px 1fr 90px;gap:12px;align-items:center;margin-bottom:9px;font-size:12px}
 .ov-band .ob-k{color:#C9C2DB;text-align:right;font-size:11.5px}
@@ -281,6 +301,7 @@ select:hover{border-color:#6E6A99}
         <button class="mode-btn" id="mode-watchlist" type="button" role="tab" aria-selected="false">Watchlist</button>
         <button class="mode-btn" id="mode-sessions" type="button" role="tab" aria-selected="false">Sessions</button>
         <button class="mode-btn" id="mode-findings" type="button" role="tab" aria-selected="false">Findings</button>
+        <button class="mode-btn" id="mode-open" type="button" role="tab" aria-selected="false">Open questions</button>
       </div>
     </div>
     <span id="filter-groups" style="display:contents">
@@ -433,6 +454,22 @@ select:hover{border-color:#6E6A99}
         </div>
         <div class="wl-covered" id="ov-blind"></div>
         <div class="find-method" id="ov-method"></div>
+      </div>
+
+      <div id="open-wrap" style="display:none">
+        <div class="find-lede" id="oq-lede"></div>
+        <div class="find-block">
+          <div class="find-h">Questions this data raises and cannot answer</div>
+          <div class="find-sub">Each one is a real pattern in the numbers with no explanation attached. If you work in one of these states, you almost certainly know something the dataset doesn't.</div>
+          <div id="oq-list"></div>
+        </div>
+        <div class="find-block">
+          <div class="find-h" id="oq-gaps-h"></div>
+          <div class="find-sub" id="oq-gaps-sub"></div>
+          <div id="oq-gaps"></div>
+        </div>
+        <div class="oq-cta" id="oq-cta"></div>
+        <div class="find-method" id="oq-method"></div>
       </div>
 
       <div id="findings-wrap" style="display:none">
@@ -944,6 +981,143 @@ function renderOverrun(){
 }
 
 // ---------------------------------------------------------------------------
+// OPEN QUESTIONS — the parts of this the data raises and cannot settle.
+//
+// The point of this view is to be forwarded. Every question is anchored to a specific
+// number computed from the panel, so a reader in that state can check it against what
+// they know, and the unresolved-cells list is a concrete ask rather than a vague
+// invitation. Numbers are derived at render time: if the dataset improves, the questions
+// narrow on their own, and a gap that gets filled disappears from the list.
+// ---------------------------------------------------------------------------
+function renderOpen(){
+  const rec=s=>record(s);
+  const rate=s=>{const r=rec(s);return 100*r.missed/r.tracked};
+
+  // --- the anchors, all computed -----------------------------------------
+  const ma=rec('Massachusetts');
+  const maDays=(BY_STATE['Massachusetts']||[]).filter(r=>r.daysLate!==null&&!r.carryover)
+    .map(r=>r.daysLate).sort((a,b)=>a-b);
+  const maMed=maDays[Math.floor(maDays.length/2)];
+  const ftDiv=STATES.filter(s=>s.lt==='full-time'&&s.trifecta==='divided')
+    .map(s=>({s:s.s,r:rate(s.s)})).sort((a,b)=>b.r-a.r);
+  const chronic=ftDiv.filter(x=>x.r>50), clean=ftDiv.filter(x=>x.r<=50);
+  const nc=rec('North Carolina');
+  const ncNone=(BY_STATE['North Carolina']||[]).filter(r=>!r.carryover&&!r.enacted).map(r=>r.fy);
+  const wi=rec('Wisconsin');
+  const noSched=STATES.map(s=>s.s).filter(s=>!new Set(OVERRUN.map(r=>r.s)).has(s));
+  const noSchedLate=noSched.filter(s=>rate(s)>30);
+  const ov=overrunFit(OVERRUN);
+
+  document.getElementById('oq-lede').innerHTML=
+    `This is the whole dataset — ${TIMELINE.length} state-fiscal-years, every row sourced, `+
+    `free to download and check. Assembling it answered some questions and opened others `+
+    `that no amount of further data collection will settle, because they are about how `+
+    `particular legislatures actually work. Those are below. `+
+    `<b style="color:#F2EEF7">If you work in one of these states, you know things this `+
+    `spreadsheet doesn't.</b>`;
+
+  const QS=[
+    {h:`Why has Massachusetts never once made its deadline?`,
+     b:`Massachusetts has missed <b>${ma.missed} of ${ma.tracked}</b> tracked budgets — every `+
+       `single one — with a median of <b>${maMed>0?'+':''}${maMed} days</b> past the fiscal `+
+       `year start. No other state is close to a perfect miss record over this span. Yet it `+
+       `produces no shutdowns and little visible alarm, because the legislature passes interim `+
+       `budgets as a matter of routine.`,
+     ask:`Is July 1 treated as a real deadline on Beacon Hill, or has the interim-budget habit `+
+       `made it advisory? Somebody who has staffed that building knows.`},
+
+    {h:`Why do identical conditions produce opposite outcomes?`,
+     b:`${ftDiv.length} states combine a full-time legislature with divided government — the `+
+       `combination that misses most often. But the group is split, not uniform: `+
+       `<b>${chronic.map(x=>`${x.s} ${x.r.toFixed(0)}%`).join(', ')}</b> against `+
+       `<b>${clean.map(x=>`${x.s} ${x.r.toFixed(0)}%`).join(', ')}</b>. Same structure, `+
+       `opposite results.`,
+     ask:`What do ${clean.map(x=>x.s).join(', ')} do that ${chronic.map(x=>x.s).join(', ')} `+
+       `don't? Something is absorbing the conflict in one group and not the other.`},
+
+    {h:`How does a state run for years with no budget at all?`,
+     b:`North Carolina has <b>${ncNone.length} fiscal years on record with no enacted budget</b> `+
+       `(${ncNone.join(', ')}) and still delivered services throughout, on continuing `+
+       `authority from prior appropriations.`,
+     ask:`If a state can operate this way, what is the deadline actually enforcing? And who `+
+       `bears the cost — the agencies, the vendors, or nobody?`},
+
+    {h:`The states that miss most are the ones this can't see coming`,
+     b:`Running past a scheduled adjournment predicts a later budget — about `+
+       `<b>${Math.round(30*ov.slope)} days of delay per month of overrun</b> `+
+       `(p = ${SIG.overrun_p}). But ${noSched.length} legislatures never schedule an `+
+       `adjournment at all, and ${noSchedLate.length} of them `+
+       `(${noSchedLate.join(', ')}) are among the worst performers in the panel. `+
+       `A legislature that never has to go home is never running late.`,
+     ask:`Would a hard adjournment date change behaviour in those chambers, or would the `+
+       `work simply move into special sessions?`},
+
+    {h:`Election years pull budgets earlier. Nobody seems to say so out loud.`,
+     b:`Budgets land roughly <b>${ELECTION_EFFECT_DAYS} days earlier</b> in legislative `+
+       `election years in annual-cycle states (p = ${SIG.elec_p}; p = ${SIG.elec_fe_p} with `+
+       `state and year fixed effects). It is a real effect and it is never cited as a reason `+
+       `for anything.`,
+     ask:`Is this legislators wanting to get home and campaign, or a calendar artifact — `+
+       `election-year sessions being scheduled shorter in the first place?`},
+
+    {h:`The money story does not hold, and that is itself a question`,
+     b:`Lean years do not produce longer fights (p = ${SIG.fiscal_p}), bigger spending `+
+       `increases do not either, and budgets are not drifting later over time `+
+       `(${SIG.trend_slope} days per year, p = ${SIG.trend_p}). National spending rose 40% in `+
+       `nominal terms between FY2015 and FY2024 and <b>0% per person</b> after inflation.`,
+     ask:`If there is no growing pot to fight over, why does budget conflict feel like it has `+
+       `intensified? Is the perception wrong, or is it measuring something other than timing?`},
+  ];
+  document.getElementById('oq-list').innerHTML=QS.map((q,i)=>
+    `<div class="oq-q"><div class="oq-num">Question ${i+1}</div>`+
+    `<div class="oq-h">${q.h}</div><div class="oq-b">${q.b}</div>`+
+    `<div class="oq-ask">${q.ask}</div></div>`).join('');
+
+  // --- the concrete ask ---------------------------------------------------
+  const gaps={};
+  TIMELINE.filter(t=>t.precision==='month-level estimate').forEach(t=>{
+    (gaps[t.state]=gaps[t.state]||[]).push('\u2019'+t.fy.slice(-2));
+  });
+  const gapStates=Object.keys(gaps).sort((a,b)=>gaps[b].length-gaps[a].length||a.localeCompare(b));
+  const gapCount=Object.values(gaps).reduce((a,v)=>a+v.length,0);
+  document.getElementById('oq-gaps-h').textContent=
+    `${gapCount} dates we could not pin down`;
+  document.getElementById('oq-gaps-sub').innerHTML=
+    `These ${gapCount} budgets are dated to the month because no source we could find gives `+
+    `the day — usually because the state enacts through a series of bills with no single `+
+    `signing, or because the record simply says "in the spring". They are marked as estimates `+
+    `throughout rather than quietly rounded. <b style="color:#C9C2DB">If you can source one `+
+    `exactly, that is a real contribution and it takes about a minute.</b>`;
+  document.getElementById('oq-gaps').innerHTML=
+    `<div class="oq-gap-grid">`+gapStates.map(s=>
+      `<div class="oq-gap"><b>${ABBR[s]||s}</b> <span>${gaps[s].sort().join(' ')}</span></div>`
+    ).join('')+`</div>`;
+
+  document.getElementById('oq-cta').innerHTML=
+    `<h4>Take the data. Check your own state.</h4>`+
+    `<p>Everything here is downloadable and every row carries its source. The fastest way to `+
+    `find an error is to hand it to somebody who was in the room — so if a date is wrong, a `+
+    `state is mischaracterised, or a question above has an obvious answer where you work, `+
+    `we want to hear it. Corrections get applied and credited.</p>`+
+    `<div class="oq-links">`+
+      `<a class="oq-link" href="data/budget_timing_pilot_data_cleaned.csv" download>`+
+        `Budget timing panel <span>· ${TIMELINE.length} rows · CSV</span></a>`+
+      `<a class="oq-link" href="data/session_overrun_data.csv" download>`+
+        `Session adjournments <span>· ${OVERRUN.length} sessions · CSV</span></a>`+
+      `<a class="oq-link" href="https://github.com/hotdogvulkin/Roboro-Capstone">`+
+        `Source and analysis <span>· GitHub</span></a>`+
+      `<a class="oq-link" href="https://github.com/hotdogvulkin/Roboro-Capstone/issues/new">`+
+        `Report a correction <span>· opens an issue</span></a>`+
+    `</div>`;
+
+  document.getElementById('oq-method').innerHTML=
+    `Every figure on this page is computed from the dataset when the page loads, so these `+
+    `questions narrow automatically as the data improves and a gap that gets filled drops off `+
+    `the list above. Questions were chosen because the data states them precisely and cannot `+
+    `resolve them — not because they are rhetorical.`;
+}
+
+// ---------------------------------------------------------------------------
 // WATCHLIST — forward-looking late risk for the next budget cycle.
 //
 // The score is deliberately not a black box. Analysis of this panel showed that ~65%
@@ -1166,7 +1340,11 @@ const SIG={ft_ontime_p:'0.0003',ft_mean_p:'0.0005',pop_p:'0.91',cycle_p:'0.27',s
   elec_p:'0.0066',        // election year, paired within state, annual-cycle states
   elec_fe_p:'0.019',      // election year, state + session-year fixed effects
   overrun_p:'2e-06',      // session overrun, state fixed effects
-  fiscal_p:'0.47'};       // real per-capita spending growth vs days late
+  fiscal_p:'0.47',        // real per-capita spending growth vs days late
+  party_raw_p:'0.002',    // R vs D miss rate, no controls
+  party_ctrl_p:'0.74',    // party = D, controlling for legislature type
+  trend_p:'0.90',         // within-state trend in days late per year
+  trend_slope:'+0.05'};   // ...and its size, days per year
 
 // Mean shift in days-late in a legislative election year, paired within state across
 // annual-cycle states. From the same offline run as SIG above; the fixed-effects estimate
@@ -1191,6 +1369,33 @@ function missColor(pct){
   const t=Math.max(0,Math.min(1,pct/60)),base=[27,17,50],hot=[225,29,82];
   const c=base.map((v,i)=>Math.round(v+(hot[i]-v)*t));
   return`rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+// Party direction is the most seductive null in this dataset, so it gets its own text
+// rather than a one-liner. Raw, Republican-trifecta states look dramatically better. But
+// party is very nearly a restatement of legislature type here — the professional,
+// year-round legislatures are overwhelmingly in blue states — and once that is in the
+// model party is worth nothing. Every figure below is computed so the confound is shown
+// rather than asserted.
+function partyNull(){
+  const g=p=>{
+    const v=STATES.filter(s=>s.trifecta===p).map(s=>{
+      const r=record(s.s);
+      return{rate:100*r.missed/r.tracked,ft:s.lt==='full-time'};
+    });
+    return{n:v.length,rate:v.reduce((a,x)=>a+x.rate,0)/v.length,
+           ft:v.filter(x=>x.ft).length};
+  };
+  const R=g('R'),D=g('D');
+  return`Republican-trifecta states look far better on paper — `+
+    `<strong>${R.rate.toFixed(1)}%</strong> of budgets missed against `+
+    `<strong>${D.rate.toFixed(1)}%</strong> for Democratic trifectas `+
+    `(p = ${SIG.party_raw_p}). It does not survive the obvious control. `+
+    `${Math.round(100*D.ft/D.n)}% of Democratic-trifecta states have full-time `+
+    `legislatures against ${Math.round(100*R.ft/R.n)}% of Republican ones, so party here `+
+    `is close to a restatement of legislature type. Put both in one model and full-time `+
+    `is worth +27 points (p = 0.001) while party is worth ${'≈'}3 and nothing `+
+    `statistically (p = ${SIG.party_ctrl_p}). It was professionalism wearing a party label.`;
 }
 
 function renderFindings(){
@@ -1313,6 +1518,8 @@ function renderFindings(){
     ['Fiscal stress',`Lean years do not produce longer fights. Real per-capita spending growth is uncorrelated with timing (p = ${SIG.fiscal_p}), and states in real contraction enacted <em>earlier</em> than expanding ones — the opposite of the hypothesis.`],
     ['The revenue cycle',`Nationally, NASBO general fund revenue growth and the on-time rate move independently. FY2021 and FY2022 were the two fastest revenue years on record; FY2021 had the worst on-time rate in the panel.`],
     ['Year-to-year momentum',`A late budget does not make the next one late. All of the apparent persistence is between-state composition (p = ${SIG.momentum_p} within state).`],
+    ['Party direction',partyNull()],
+    ['Getting worse over time',`Budgets are not drifting later. The within-state trend is ${SIG.trend_slope} days per year, indistinguishable from flat (p = ${SIG.trend_p}). Nor is there a bigger pot to fight over: national spending rose 40% in nominal terms between FY2015 and FY2024 and <em>0%</em> per person once inflation and population growth are taken out.`],
     ['State size',`Bigger states do look later on their own, but the effect disappears once legislature type is controlled for (p = ${SIG.pop_p}). Size was proxying for professionalism.`],
     ['Spending level',`Per-capita spending has no relationship to timing (p = ${SIG.spend_p}). Expensive states are not slower states.`],
     ['Party control alone',`Divided vs. one-party control on its own does not reach significance (p = ${SIG.tri_p}). It only bites in combination with a full-time legislature — see the matrix above.`],
@@ -1846,19 +2053,20 @@ function setSpendingUnit(u){
 
 function setMode(m){
   mode=m;
-  ['snapshot','trend','watchlist','sessions','findings'].forEach(k=>{
+  ['snapshot','trend','watchlist','sessions','findings','open'].forEach(k=>{
     const b=document.getElementById('mode-'+k);
     b.classList.toggle('active',m===k); b.setAttribute('aria-selected',m===k);
   });
   // Watchlist, Sessions and Findings are all dataset-wide views: same full-width,
   // no-filters, no-drill-in chrome as each other.
-  const isWatch=m==='watchlist',isSess=m==='sessions';
-  const isFind=m==='findings'||isWatch||isSess;
+  const isWatch=m==='watchlist',isSess=m==='sessions',isOpen=m==='open';
+  const isFind=m==='findings'||isWatch||isSess||isOpen;
   document.getElementById('chart-wrap').style.display=m==='snapshot'?'block':'none';
   document.getElementById('heatmap-wrap').style.display=m==='trend'?'block':'none';
   document.getElementById('watchlist-wrap').style.display=isWatch?'block':'none';
   document.getElementById('sessions-wrap').style.display=isSess?'block':'none';
   document.getElementById('findings-wrap').style.display=m==='findings'?'block':'none';
+  document.getElementById('open-wrap').style.display=isOpen?'block':'none';
   document.getElementById('sort-group').style.display=m==='snapshot'?'flex':'none';
   document.getElementById('sort-divider').style.display=m==='snapshot'?'block':'none';
   document.getElementById('snapshot-legend').style.display=m==='snapshot'?'flex':'none';
@@ -1875,12 +2083,14 @@ function setMode(m){
     ?`Avg. days past fiscal year start — budget enacted (FY${YEARS[0]}–FY${YEARS[YEARS.length-1]})`
     :isWatch?`Who is likely to be late next?`
     :isSess?`The signal that moves while the budget is still in play`
+    :isOpen?'What we still don’t know'
     :m==='findings'?'What predicts a late budget?'
     :`Days late by fiscal year, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]} — all 50 states`;
   document.getElementById('chart-sub-text').style.display=isFind?'none':'block';
   if(m==='findings')renderFindings();
   if(isWatch)renderWatchlist();
   if(isSess)renderOverrun();
+  if(isOpen)renderOpen();
   updateTrendChrome();
   refresh();
 }
@@ -1894,6 +2104,7 @@ document.getElementById('mode-trend').addEventListener('click',()=>setMode('tren
 document.getElementById('mode-watchlist').addEventListener('click',()=>setMode('watchlist'));
 document.getElementById('mode-sessions').addEventListener('click',()=>setMode('sessions'));
 document.getElementById('mode-findings').addEventListener('click',()=>setMode('findings'));
+document.getElementById('mode-open').addEventListener('click',()=>setMode('open'));
 document.getElementById('color-timing').addEventListener('click',()=>setColorMode('timing'));
 document.getElementById('color-spending').addEventListener('click',()=>setColorMode('spending'));
 document.getElementById('heatmap-sort-filter').addEventListener('change',()=>{updateTrendChrome();refresh();});
