@@ -30,7 +30,6 @@ Five views:
 | **Trend** | Per-state heatmap, FY2014–FY2027, plus the national on-time rate. |
 | **Watchlist** | FY2028 late-risk, scored and ranked. |
 | **Sessions** | How far each legislature ran past its own scheduled adjournment. |
-
 | **Findings** | What predicts a late budget, and what turns out not to. |
 
 Every descriptive figure is computed from the dataset at render time rather than typed
