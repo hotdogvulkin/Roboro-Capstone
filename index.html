@@ -272,9 +272,9 @@ select:hover{border-color:#6E6A99}
   <div class="controls">
     <div class="ctrl-group">
       <div class="mode-toggle" role="tablist" aria-label="View mode">
-        <button class="mode-btn" id="mode-snapshot" type="button" role="tab" aria-selected="false">Snapshot</button>
+        <button class="mode-btn active" id="mode-snapshot" type="button" role="tab" aria-selected="true">Snapshot</button>
         <button class="mode-btn" id="mode-trend" type="button" role="tab" aria-selected="false">Trend</button>
-        <button class="mode-btn active" id="mode-watchlist" type="button" role="tab" aria-selected="true">Watchlist</button>
+        <button class="mode-btn" id="mode-watchlist" type="button" role="tab" aria-selected="false">Watchlist</button>
         <button class="mode-btn" id="mode-sessions" type="button" role="tab" aria-selected="false">Sessions</button>
         <button class="mode-btn" id="mode-findings" type="button" role="tab" aria-selected="false">Findings</button>
       </div>
@@ -1686,9 +1686,9 @@ function showStateDetail(name){
 function barColor(d,n){if(n>0)return'#E24B4A';if(d<=0)return'#1D9E75';if(d<=20)return'#3B6D11';if(d<=50)return'#BA7517';if(d<=100)return'#D85A30';return'#E24B4A'}
 function badge(d,n){if(n>0)return'<span class="badge badge-red">No-budget year(s)</span>';if(d<=0)return'<span class="badge badge-green">On time</span>';if(d<=30)return'<span class="badge badge-amber">Moderately late</span>';return'<span class="badge badge-red">Chronically late</span>'}
 
-// Watchlist is the landing view: the forward-looking question is the one worth opening on,
-// and Snapshot is one click away for anyone who wants to orient across all 50 states first.
-let mode='watchlist';
+// Snapshot is the landing view: it orients someone across all 50 states before asking them
+// to read a risk score. Watchlist is one click away.
+let mode='snapshot';
 let currentDetailState=null;
 let chart,filtered=[...STATES];
 
