@@ -1,0 +1,248 @@
+==============================================================================
+                  PREDICTIVE SIGNALS IN STATE BUDGET TIMING                   
+==============================================================================
+
+source rows                 651
+biennial carryovers dropped 74
+no-budget rows dropped      9
+analysis panel              568 state-years across 50 states, FY2014-FY2027
+base rate of a late budget  13.0%
+
+==============================================================================
+ANALYSIS 1. PRIOR-YEAR AUTOCORRELATION — is lateness sticky?
+==============================================================================
+
+-- correlation of days-late with the prior observation -----------------------
+  strict lag-1 fiscal year   n=460  Pearson r=+0.584 (p=2.1e-43)   Spearman rho=+0.677 (p=5.9e-63)
+  consecutive budget events  n=518  Pearson r=+0.593 (p=2.1e-50)   Spearman rho=+0.692 (p=4.4e-75)
+
+-- confusion matrix on strict lag-1 pairs (late = days_late > 0) -------------
+                        this year LATE   this year ON TIME
+  last year LATE                   32                  26     (32/58 = 55.2% repeat)
+  last year ON TIME                27                 375     (375/402 = 93.3% stay clean)
+
+  chi-square = 102.2 (p=5.1e-24),  odds ratio = 17.1 (Fisher p=9.7e-18)
+  lift over the 13.0% base rate: 4.2x
+
+-- is it momentum, or is it just the state? (within-state demeaning) ---------
+  observed within-state r          -0.141  (n=460)
+  permutation null                 -0.089 +/- 0.064
+     (demeaning with the state's own mean induces a negative bias by construction;
+      the permutation null measures exactly how much, so it can be subtracted off)
+  z vs null = -0.80,  two-sided permutation p = 0.427
+
+  between-state share of variance  65.1%   (F=19.7, p=1.9e-89)
+  intraclass correlation (ICC)     0.62
+
+-- walk-forward forecast — only years BEFORE the target are used -------------
+  (evaluated on the 418 state-years with at least 3 years of prior history)
+
+  A: late last year                    precision  53.6%   recall  52.6%   accuracy  87.3%
+  B: late in >50% of prior years       precision  77.1%   recall  47.4%   accuracy  90.9%
+  C: late in >=1 prior year            precision  31.0%   recall  77.2%   accuracy  73.4%
+  D: never predict late (null model)   precision   nan%   recall   0.0%   accuracy  86.4%
+
+-- miss rate by state --------------------------------------------------------
+  Massachusetts    12/12 = 100.0%
+  Wisconsin         6/6  = 100.0%
+  Pennsylvania      9/12 =  75.0%
+  North Carolina    5/7  =  71.4%
+  New York          9/13 =  69.2%
+  Oregon            7/13 =  53.8%
+  New Hampshire     2/6  =  33.3%
+  Rhode Island      4/13 =  30.8%
+  Ohio              2/7  =  28.6%
+  Hawaii            3/13 =  23.1%
+  ... 28 of 50 states never missed once.
+
+  >> FINDING: Lateness is highly persistent, but the persistence lives in the state, not in the year: 65% of the variance in days-late is between states (ICC 0.62), and once a state's own average is removed, last year's result carries no information about this year's (permutation p=0.43). A state that missed last year misses again 55% of the time versus a 13% base rate (4.2x lift) — but its multi-year track record is the sharper instrument still, forecasting a miss at 77% precision against 54% for last year's outcome alone.
+
+==============================================================================
+ANALYSIS 2. ELECTION-YEAR EFFECT — do legislators hurry home to campaign?
+==============================================================================
+
+-- unpaired comparison (confounded — see the caveat below) -------------------
+  subset                           election yrs                      off-years     MWU p
+  all states       n=261 mean  -46.8d late 10.7%   n=307 mean  -31.9d late 15.0%    0.0006
+  annual cycle     n=199 mean  -42.9d late 10.1%   n=200 mean  -37.8d late 12.5%    0.3311
+  biennial cycle   n= 62 mean  -59.3d late 12.9%   n=107 mean  -20.8d late 19.6%    0.0000
+  full-time leg.   n=101 mean  -22.3d late 20.8%   n=109 mean   -0.8d late 36.7%    0.0004
+  part-time leg.   n=160 mean  -62.3d late  4.4%   n=198 mean  -49.0d late  3.0%    0.0045
+
+  CAVEAT: for a biennial state with odd-year sessions, 'off-year' and 'the long
+  budget-writing session' are the same thing, so the unpaired biennial gap is not an
+  election effect. The paired and fixed-effects tests below deal with this.
+
+-- paired within-state (each state compared against itself) ------------------
+  election year, all states          states= 41  mean  -16.1d  median   -8.3d  faster 30/41  Wilcoxon p=0.0001
+  election year, annual states only  states= 31  mean   -8.5d  median   -4.5d  faster 21/31  Wilcoxon p=0.0066
+  PLACEBO: even calendar year        states= 41  mean  -14.2d  median   -4.5d  faster 30/41  Wilcoxon p=0.0007
+  The placebo lands close to the real thing, and it has to: for 44 of 50 states an
+  election year IS an even year, so the two dummies are nearly the same variable. The
+  fixed-effects model below is what separates them.
+
+-- OLS with state AND session-year fixed effects -----------------------------
+  election coefficient  -11.19 days   (se 4.77, t=-2.35, p=0.019, n=568)
+  Year fixed effects absorb everything national — COVID, revenue cycles, and any
+  generic even/odd-year rhythm. What identifies the coefficient is the six states
+  whose legislative election calendar differs from the other 44: AL, MD (midterm
+  4-year terms) and LA, MS, NJ, VA (odd-year elections).
+
+-- states that break the pattern ---------------------------------------------
+  faster in election years  Oregon             -66.6d vs   +38.8d   (-105)
+  faster in election years  North Carolina      +1.3d vs   +77.5d   (-76)
+  faster in election years  Maine              -74.7d vs   -18.7d   (-56)
+  faster in election years  Washington         -81.0d vs   -29.2d   (-52)
+  SLOWER in election years  Rhode Island       +15.4d vs    +4.2d   (+11)
+  SLOWER in election years  Utah               -94.6d vs  -107.2d   (+13)
+  SLOWER in election years  Massachusetts      +43.3d vs   +19.8d   (+24)
+
+  >> FINDING: Election years really are faster, by roughly a week to a week and a half. Within annual-cycle states the budget lands 8.5 days earlier on average in a legislative election year (21 of 31 states move in that direction, Wilcoxon p=0.007), and the effect survives state and year fixed effects at -11.2 days (p=0.019). It is a real but second-order signal: it shifts the expected date, and does not rescue a chronically late state.
+
+==============================================================================
+ANALYSIS 3. FISCAL STRESS — do lean years produce longer budget fights?
+==============================================================================
+  spending series covers FY2015-FY2024 at these points: [2015, 2017, 2019, 2021, 2023, 2024]
+  It is biennial, not annual, so growth below is the ANNUALISED rate over each
+  interval — a medium-term spending trajectory, not a one-year revenue shock.
+
+-- state level: real per-capita spending growth vs days-late -----------------
+  n = 209 state-years;  growth mean +0.13%/yr, sd 9.02
+  Pearson  r   = +0.050  (p=0.469)
+  Spearman rho = +0.061  (p=0.384)
+  bottom tercile (<= -1.7%/yr) n= 70  mean  -44.7d  late 15.7%
+  middle tercile               n= 69  mean  -48.9d  late  8.7%
+  top tercile   (>  +2.4%/yr)  n= 70  mean  -31.6d  late 17.1%
+  real contraction  n= 93  mean  -47.6d  late 12.9%
+  real expansion    n=116  mean  -37.0d  late 14.7%
+  Mann-Whitney contraction vs expansion p = 0.347
+  within-state (demeaned) r = +0.066  (p=0.349, n=201)
+
+-- national level: NASBO general fund revenue growth vs on-time rate ---------
+   FY   states enacting   on-time%   rev growth nom / real
+  2015               41      95.1        +5.0 / +4.1
+  2016               49      83.7        +1.8 / +4.0
+  2017               41      90.2        +2.4 / +1.8
+  2018               49      77.6        +6.9 / +3.4
+  2019               40      92.5        +5.7 / +2.7
+  2020               49      85.7        -0.6 / -2.5
+  2021               39      74.4       +16.6 / +12.1
+  2022               50      86.0       +16.3 / +8.1
+  2023               41      87.8        -1.2 / -5.2
+  2024               49      83.7        +2.7 / +0.9
+  2025               39      87.2        +4.9 / +3.0
+  2026               47      85.1        +2.2 / -0.7
+  2027               42      85.7        +2.5 /    n/a
+  same-year nominal growth          n=13  r=-0.410 (p=0.165)   rho=-0.138 (p=0.654)
+  PRIOR-year nominal growth         n=12  r=+0.386 (p=0.215)   rho=+0.484 (p=0.111)
+  same-year real growth             n=12  r=-0.398 (p=0.200)   rho=-0.200 (p=0.534)
+  same-year nominal, ex-FY2020/21   n=11  r=-0.062 (p=0.856)   rho=+0.073 (p=0.831)
+
+  The prior-year column is the one a forecaster could actually use: when the FY N
+  budget is being written in spring of FY N-1, FY N's revenue is still unknown.
+
+  >> FINDING: Fiscal stress does not predict lateness, at either level. Real per-capita spending growth is uncorrelated with days-late across 209 state-years (r=+0.05, p=0.47), and states in real contraction actually enacted 11 days EARLIER on average than expanding states, the opposite of the hypothesis. Nationally, revenue growth and the on-time rate move independently. Budget fights are about disagreement, not scarcity — the two fastest revenue years on record, FY2021 and FY2022, produced the worst and one of the better on-time rates in the panel.
+
+==============================================================================
+ANALYSIS 4. SESSION OVERRUN — does a session running long predict a late budget?
+==============================================================================
+  Source: NCSL's 'Legislative Session Calendar', read at two vintages of the same
+  document — an early-season edition giving the SCHEDULED adjournment and a
+  post-session edition giving the ACTUAL sine die. Editions come from NCSL and from
+  the Internet Archive, so the scheduled column is a contemporaneous forecast rather
+  than a date reconstructed after the fact. See build_session_overrun.py.
+  410 state-years with both dates and a matching budget observation.
+
+
+-- correlation of session overrun with days-late -----------------------------
+  n = 410 state-years, 44 states, 12 session years
+  overrun: mean +5.6d, median +0.0d, ran long in 29% of state-years
+  Pearson  r   = +0.136  (p=0.0058)
+  Spearman rho = +0.160  (p=0.0012)
+  restricted to exactly-dated scheduled adjournments: n=360, r=+0.131 (p=0.013)
+  dropping the 28 sessions that adjourned >14d early: n=382, r=+0.147 (p=0.0039), rho=+0.176 (p=0.00056)
+
+-- overrun bands -------------------------------------------------------------
+  on or before schedule    n=290  mean  -50.2d  missed   6.6%
+  1-13 days over           n= 62  mean  -41.5d  missed   6.5%
+  14-29 days over          n= 20  mean  -47.5d  missed   0.0%
+  30+ days over            n= 38  mean  -24.6d  missed  13.2%
+
+  ran long vs adjourned on schedule: miss rate 7.5% vs 6.6%
+  Mann-Whitney on days-late p=0.011;  odds ratio 1.2 (Fisher p=0.83)
+
+-- does overrun add anything beyond knowing which state it is? ---------------
+  within-state (demeaned) r = +0.245  (p=5.9e-07, n=407, 42 states)
+  This is the question that matters for early warning: given the same state, does a
+  session that runs longer than usual land its budget later than usual?
+  permutation null +0.001 +/- 0.052   -> p < 0.001 (z = +4.7)
+
+  OLS with state fixed effects:  +0.246 days later per day of overrun
+    (se 0.051, t=+4.81, p=2.2e-06, n=410)
+    -> a session running 30 days past its scheduled adjournment implies a budget
+       roughly 7 days later than that same state's own norm.
+
+-- robustness of the fixed-effects slope -------------------------------------
+  all state-years                            n=410  +0.246 (se 0.051, p=2.2e-06)
+  excluding 2021 (redistricting returns)     n=369  +0.328 (se 0.072, p=6.4e-06)
+  excluding COVID years 2020-2021            n=347  +0.323 (se 0.102, p=0.0017)
+  excluding overruns beyond 90 days          n=401  +0.252 (se 0.088, p=0.0045)
+  trimmed to (-14, +90] days                 n=373  +0.376 (se 0.120, p=0.0019)
+  The slope gets steeper, not shallower, once those are removed.
+
+-- coverage limits -----------------------------------------------------------
+  6 states never appear: Massachusetts, Michigan, New Jersey, New York, Ohio, Wisconsin
+  Most are missing because their legislature has no scheduled adjournment at all —
+  NCSL prints '*' for them. An overrun cannot be defined where nothing was scheduled.
+  Of those, 6 are full-time legislatures: Massachusetts, Michigan, New Jersey, New York, Ohio, Wisconsin
+
+  >> FINDING: Session overrun is a genuine leading indicator, and the only one of the four that a platform could act on while the outcome is still in play. It is strongest exactly where a forecaster needs it — inside a single state, comparing a session against that state's own norm: within-state r=+0.24 (p=6e-07), and state fixed effects put the slope at +0.25 days of budget delay per day of overrun (p=2e-06), so a month-long overrun implies a budget about 7 days later than usual. State-years that ran 30+ days long missed the fiscal-year start 13% of the time against a 7% rate across this sample. Its blind spot is structural: the measure is undefined for the year-round legislatures that miss most often, because they never schedule an adjournment to overrun.
+
+==============================================================================
+                        WHAT TO PUT IN THE WHITE PAPER                        
+==============================================================================
+1. BUDGET TIMING IS A STATE TRAIT, NOT A YEARLY COIN FLIP.
+   65% of the variance in how late a budget lands is variation between states
+   rather than within them (ICC 0.62). 28 of 50 states have never missed their
+   fiscal-year start once in the panel; Massachusetts has missed all 12. Knowing
+   which state you are looking at is most of the forecast.
+
+2. THE TRACK RECORD BEATS LAST YEAR.
+   A rule that fires when a state has missed in a majority of its prior years calls
+   the next miss at 77% precision against a 13% base rate. "Was it late last
+   year?" manages only 54% — and once each state's own average is removed, last
+   year's result carries no information at all (permutation p=0.43). Recency is
+   noise; history is signal.
+
+3. SESSION OVERRUN IS THE ONE LIVE, IN-SEASON SIGNAL.
+   Within a state, every day a session runs past its scheduled adjournment adds about
+   0.25 days to the budget's delay (p=2e-06) — a month-long overrun means a budget
+   roughly 7 days later than that state's own norm. This is the only one of the
+   four that moves while the outcome is still undecided, and it is exactly the kind
+   of thing a platform tracking legislative calendars in real time can watch.
+
+   Secondary: legislative election years pull budgets about 9 days earlier in
+   annual-cycle states (p=0.007; -11 days under state and year fixed effects,
+   p=0.019).
+
+RULED OUT — and worth saying so, because each is a plausible story that fails:
+   * fiscal stress          real per-capita spending growth vs days-late, r=+0.05 (p=0.47);
+                            contracting states enacted EARLIER, not later
+   * national revenue cycle  NASBO general fund revenue growth vs the national on-time
+                            rate, no relationship across FY2015-FY2027
+   * year-to-year momentum   no within-state autocorrelation once the state's own
+                            average is removed
+
+==============================================================================
+                                 METHOD NOTES                                 
+==============================================================================
+p-values are computed live by this script from scipy 1.15; nothing is hardcoded.
+Tests are two-sided throughout. Mann-Whitney U and Wilcoxon signed-rank are used in
+place of t-tests wherever the days-late distribution is the skewed one it plainly is;
+where a mean is reported a Welch or OLS check was run alongside and agreed on sign.
+
+The unit of analysis is the state-year for correlations and the state for paired tests.
+Because two thirds of the variance in days-late sits between states rather than within
+them (analysis 1), any comparison that pools state-years without a within-state control
+will pick up state composition and report it as an effect. Analyses 2, 3 and 4 each
+therefore carry a demeaned or fixed-effects version, and those are the ones to quote.

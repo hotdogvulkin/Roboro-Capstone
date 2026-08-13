@@ -1,0 +1,51 @@
+state,fy_start,budget_cycle,legislature_type,constitutional_deadline,shutdown_history,notes
+Alabama,Oct 1,annual,part-time,no,,
+Alaska,Jul 1,annual,full-time,no,,
+Arizona,Jul 1,annual,full-time,no,,
+Arkansas,Jul 1,annual,part-time,no,,
+California,Jul 1,annual,full-time,yes,"Constitutional deadline: Jun 15 for legislature; governor signs ~2 weeks later",
+Colorado,Jul 1,annual,part-time,no,,
+Connecticut,Jul 1,biennial,full-time,no,"2017: 4 months executive order governance (FY2018)",
+Delaware,Jul 1,annual,part-time,no,,
+Florida,Jul 1,annual,full-time,no,,
+Georgia,Jul 1,annual,part-time,no,,
+Hawaii,Jul 1,biennial,part-time,no,,
+Idaho,Jul 1,annual,part-time,no,,"Signs budget as series of individual appropriation bills"
+Illinois,Jul 1,annual,full-time,no,"2015-2017: 793-day budget impasse; no complete FY2016 or FY2017 budget",
+Indiana,Jul 1,biennial,part-time,no,,
+Iowa,Jul 1,annual,part-time,no,,
+Kansas,Jul 1,annual,part-time,no,,
+Kentucky,Jul 1,biennial,part-time,no,,
+Louisiana,Jul 1,annual,part-time,no,,
+Maine,Jul 1,biennial,part-time,no,,
+Maryland,Jul 1,annual,full-time,no,,
+Massachusetts,Jul 1,annual,full-time,no,,"Chronically late; interim budgets common"
+Michigan,Oct 1,annual,full-time,no,,
+Minnesota,Jul 1,biennial,part-time,no,"2011: 20-day government shutdown over budget impasse",
+Mississippi,Jul 1,annual,part-time,no,,
+Missouri,Jul 1,annual,part-time,no,,
+Montana,Jul 1,biennial,part-time,no,,
+Nebraska,Jul 1,biennial,part-time,no,,"Unicameral legislature"
+Nevada,Jul 1,biennial,part-time,no,,"Legislature meets 120 days every odd year"
+New Hampshire,Jul 1,biennial,part-time,no,,
+New Jersey,Jul 1,annual,full-time,no,"2017: 3-day government shutdown (FY2018); Horizon BCBS dispute","Governor has strong budget authority"
+New Mexico,Jul 1,annual,part-time,no,,"30-day or 60-day sessions alternating years"
+New York,Apr 1,annual,full-time,yes,"Constitutional deadline: Apr 1","Chronically late under Hochul"
+North Carolina,Jul 1,biennial,full-time,no,,"FY2026-27 biennium: STILL no complete budget as of Jul 2026"
+North Dakota,Jul 1,biennial,part-time,no,,"Legislature meets 80 days every odd year"
+Ohio,Jul 1,biennial,full-time,no,,
+Oklahoma,Jul 1,annual,part-time,no,,
+Oregon,Jul 1,biennial,full-time,no,,
+Pennsylvania,Jul 1,annual,full-time,yes,"2015-2016: 9-month impasse (FY2016); 2020: COVID delay (FY2021); 2025: 134-day impasse (FY2026)","Constitutional deadline Jul 1; 5 consecutive misses FY2023-FY2027"
+Rhode Island,Jul 1,annual,full-time,no,,
+South Carolina,Jul 1,annual,part-time,no,"2026: first continuing resolution in recent history (FY2027)",
+South Dakota,Jul 1,annual,part-time,no,,"35-day session"
+Tennessee,Jul 1,annual,part-time,no,,
+Texas,Sep 1,biennial,part-time,no,,"140-day session every odd year"
+Utah,Jul 1,annual,part-time,no,,"45-day session; consistently 100+ days early"
+Vermont,Jul 1,annual,part-time,no,,
+Virginia,Jul 1,biennial,part-time,no,,"FY2024 skinny budget required September special session"
+Washington,Jul 1,biennial,full-time,no,,
+West Virginia,Jul 1,annual,part-time,no,,"60-day session"
+Wisconsin,Jul 1,biennial,full-time,no,,
+Wyoming,Jul 1,biennial,part-time,no,,"20-day budget sessions in even years"
