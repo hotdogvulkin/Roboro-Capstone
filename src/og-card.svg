@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0B0614"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#E11D52"/>
+  <g transform="translate(72,86)">
+    <circle cx="11" cy="11" r="11" fill="#E11D52"/>
+    <circle cx="41" cy="11" r="11" fill="#6E6A99"/>
+    <circle cx="11" cy="41" r="11" fill="#6E6A99" opacity=".5"/>
+    <circle cx="41" cy="41" r="11" fill="#E11D52" opacity=".4"/>
+    <text x="76" y="20" font-family="Helvetica,Arial" font-size="30" font-weight="bold" fill="#F2EEF7">Roboro</text>
+    <text x="76" y="50" font-family="Helvetica,Arial" font-size="20" fill="#9B93B5">Legislative intelligence</text>
+  </g>
+  <text x="72" y="290" font-family="Helvetica,Arial" font-size="72" font-weight="bold" fill="#F2EEF7">State Budget Timing</text>
+  <text x="72" y="368" font-family="Helvetica,Arial" font-size="72" font-weight="bold" fill="#E11D52">All 50 States</text>
+  <text x="72" y="440" font-family="Helvetica,Arial" font-size="27" fill="#C9C2DB">651 state-fiscal-years, FY2015-FY2027, verified against primary sources.</text>
+  <g font-family="Helvetica,Arial">
+    <text x="72" y="540" font-size="44" font-weight="bold" fill="#F2EEF7">96%</text>
+    <text x="72" y="572" font-size="18" fill="#9B93B5">part-time on time</text>
+    <text x="300" y="540" font-size="44" font-weight="bold" fill="#F2EEF7">66%</text>
+    <text x="300" y="572" font-size="18" fill="#9B93B5">full-time on time</text>
+    <text x="530" y="540" font-size="44" font-weight="bold" fill="#F2EEF7">5.3x</text>
+    <text x="530" y="572" font-size="18" fill="#9B93B5">lift over base rate</text>
+    <text x="760" y="540" font-size="44" font-weight="bold" fill="#F2EEF7">13/13</text>
+    <text x="760" y="572" font-size="18" fill="#9B93B5">Massachusetts misses</text>
+  </g>
+</svg>

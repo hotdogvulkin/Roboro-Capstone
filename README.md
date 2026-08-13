@@ -9,16 +9,39 @@ forward-looking risk model for FY2028.
 ## What's here
 
 ```
-index.html      the dashboard — standalone, no build step, no network dependencies
-og-card.png     link preview image
-data/           the datasets the dashboard is built from
-analysis/       the statistics, and the scripts that produced the data
+src/dashboard.html   the source — this is the only file you edit
+src/vendor/          Chart.js and Inter, vendored so builds are reproducible
+src/og-card.svg      source of the link-preview image
+build.py             src/ -> index.html
+index.html           GENERATED. Overwritten on every build; do not edit
+og-card.png          generated link preview
+data/                the datasets the dashboard is built from
+analysis/            the statistics, and the scripts that produced the data
 ```
 
-`index.html` is fully self-contained: Chart.js and the Inter typeface are embedded
-rather than loaded from a CDN, so it renders identically offline, on a locked-down
-conference network, or straight off the filesystem. Open it by double-clicking — no
-server required.
+GitHub Pages serves the repo root, which is why the built page has to land there as
+`index.html` rather than in a `dist/` directory. It carries a "generated file" banner
+so nobody edits it by mistake.
+
+## Building
+
+```bash
+python3 build.py           # rebuild index.html from src/
+python3 build.py --check   # verify index.html matches src/ (exit 1 if stale)
+```
+
+No dependencies — standard library only. The build inlines Chart.js and the Inter
+typeface from `src/vendor/`, so the published page makes **no network requests at all**
+and renders identically offline, on a locked-down conference network, or opened
+straight off the filesystem. Both are checked into the repo rather than downloaded at
+build time, so a build does not depend on cdnjs or Google Fonts being reachable.
+
+It also adds the description, favicon and Open Graph tags that make a shared link
+render as a preview card. `BASE_URL` at the top of `build.py` is the only thing to
+change if the site ever moves.
+
+Run `--check` before pushing. If it fails, you edited `index.html` instead of
+`src/dashboard.html`, or forgot to rebuild.
 
 ## The dashboard
 
@@ -93,8 +116,12 @@ notes. `budget_timing_predictive_findings.txt` is the saved output of that run.
 
 ## Deploying
 
-It is one static file. On GitHub Pages, push this folder and enable Pages on the branch
-— no build, no configuration. `index.html` at the repo root is served automatically.
+```bash
+python3 build.py && git add -A && git commit -m "..." && git push
+```
+
+Pages is configured to serve `main` at the repo root and rebuilds on push, usually
+within a minute.
 
 ---
 
