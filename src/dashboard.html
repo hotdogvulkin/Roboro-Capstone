@@ -30,13 +30,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0B0614;color:#F2EEF7;m
 .hero p{font-size:14px;color:#9B93B5;max-width:620px;line-height:1.6}
 
 .controls{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.ctrl-group{display:flex;align-items:center;gap:6px}
+.ctrl-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;max-width:100%}
 .ctrl-group label{font-size:11px;color:#9B93B5;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 select{background:#1A1030;color:#F2EEF7;border:1px solid #3D2B5E;border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;cursor:pointer;outline:none}
 select:hover{border-color:#6E6A99}
 .divider{width:1px;height:20px;background:#2D1B4E}
 
-.mode-toggle{display:flex;background:#1A1030;border:1px solid #3D2B5E;border-radius:8px;padding:3px;gap:2px}
+.mode-toggle{display:flex;flex-wrap:wrap;background:#1A1030;border:1px solid #3D2B5E;border-radius:8px;padding:3px;gap:2px;max-width:100%}
 .mode-btn{background:transparent;border:none;color:#9B93B5;font-size:12px;font-family:inherit;font-weight:500;padding:6px 14px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
 .mode-btn:hover{color:#F2EEF7}
 .mode-btn.active{background:#E11D52;color:#fff}
@@ -49,13 +49,14 @@ select:hover{border-color:#6E6A99}
 .metric-sub{font-size:11px;color:#6E6A99;margin-top:4px}
 .metric.accent{border-color:#E11D52;border-opacity:.4}
 
-.main{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start}
+.main>*{min-width:0}
 /* Findings is a read-only narrative view: no per-state drill-in, no filtered
    metrics, so it takes the full width. */
 .main.findings-mode{grid-template-columns:1fr}
 .main.findings-mode .detail-card{display:none}
 
-.chart-card{background:#1A1030;border:1px solid #2D1B4E;border-radius:12px;padding:20px}
+.chart-card{background:#1A1030;border:1px solid #2D1B4E;border-radius:12px;padding:20px;min-width:0}
 .chart-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:12px;flex-wrap:wrap}
 .chart-title{font-size:13px;font-weight:500;color:#F2EEF7}
 .chart-sub{font-size:11px;color:#9B93B5;margin-top:3px}
@@ -120,7 +121,7 @@ select:hover{border-color:#6E6A99}
 .matrix{border-collapse:separate;border-spacing:6px;font-size:12px}
 .matrix th{font-size:10px;font-weight:500;color:#9B93B5;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;text-align:center}
 .matrix th.rowh{text-align:right;white-space:nowrap;text-transform:none;font-size:11.5px;letter-spacing:0;color:#F2EEF7;font-weight:500}
-.matrix td{width:150px;height:74px;border-radius:9px;text-align:center;vertical-align:middle;border:1px solid rgba(242,238,247,.12)}
+.matrix td{width:150px;min-width:120px;height:74px;border-radius:9px;text-align:center;vertical-align:middle;border:1px solid rgba(242,238,247,.12)}
 .mx-val{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1}
 .mx-sub{font-size:10px;opacity:.82;margin-top:5px}
 .find-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
@@ -235,6 +236,29 @@ select:hover{border-color:#6E6A99}
   .trend-stats-grid{grid-template-columns:1fr}
   .page{padding:16px}
 }
+/* ---- Responsive --------------------------------------------------------- */
+/* This page gets forwarded — the Open questions view exists to be shared — so it has
+   to survive being opened on a phone. Below 820px the fixed 260px detail rail stops
+   earning its space and the fixed-column stat grids get too narrow to read. */
+@media (max-width:820px){
+  .main{grid-template-columns:minmax(0,1fr)}
+  .detail-card{position:static}
+  .find-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .wl-val{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+}
+@media (max-width:560px){
+  .page-head h1{font-size:26px}
+  .chart-card{padding:15px}
+  .mode-btn{padding:6px 10px;font-size:12px}
+  .metrics{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  /* Label column shrinks first; the bar keeps enough room to still read as a bar. */
+  .ov-band{grid-template-columns:104px minmax(0,1fr) 72px;gap:8px}
+  .ov-band .ob-k{font-size:10.5px}
+  .find-grid,.wl-val{grid-template-columns:1fr}
+  /* The matrix is the one block that cannot reflow — let it scroll in place. */
+  #find-matrix{overflow-x:auto}
+}
+
 </style>
 </head>
 <body>

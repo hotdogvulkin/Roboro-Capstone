@@ -199,6 +199,100 @@ ANALYSIS 4. SESSION OVERRUN — does a session running long predict a late budge
   >> FINDING: Session overrun is a genuine leading indicator, and the only one of the four that a platform could act on while the outcome is still in play. It is strongest exactly where a forecaster needs it — inside a single state, comparing a session against that state's own norm: within-state r=+0.24 (p=6e-07), and state fixed effects put the slope at +0.25 days of budget delay per day of overrun (p=2e-06), so a month-long overrun implies a budget about 7 days later than usual. State-years that ran 30+ days long missed the fiscal-year start 13% of the time against a 7% rate across this sample. Its blind spot is structural: the measure is undefined for the year-round legislatures that miss most often, because they never schedule an adjournment to overrun.
 
 ==============================================================================
+ANALYSIS 5. PARTY DIRECTION — is lateness a red/blue story?
+==============================================================================
+
+-- Raw comparison, no controls -----------------------------------------------
+             states   miss rate   mean days  full-time legs
+  R              23        4.7%       -56.2         2/23   
+  D              16       22.4%       -21.8        10/16   
+  divided        11       24.9%       -19.1         6/11   
+
+  Kruskal-Wallis, all three groups   p = 0.014
+  Mann-Whitney R vs D, miss rate     p = 0.002
+  Mann-Whitney R vs D, mean days     p = 0.008
+
+-- The confound --------------------------------------------------------------
+  share of each group with a full-time legislature:
+    R             8.7%
+    D            62.5%
+    divided      54.5%
+
+  Legislature type is the strongest structural variable in this dataset
+  (analysis 1 and the on-time gap below), and it is distributed across party
+  groups about as unevenly as it could be. Party here is close to a restatement
+  of professionalism, so the raw contrast above cannot be read as a party effect.
+
+-- OLS: miss rate ~ legislature type + party  (state level, n=50) ------------
+  intercept                    +2.31  (se  4.83)   p = 0.634
+  full-time legislature       +27.42  (se  7.95)   p = 0.001  <-- significant
+  party = D                    +2.90  (se  8.60)   p = 0.737
+  party = divided              +7.65  (se  9.16)   p = 0.408
+
+  >> FINDING: Party direction does not survive the control. Republican-trifecta states miss 4.7% of budgets against 22.4% for Democratic trifectas (p = 0.002), but 62.5% of Democratic-trifecta states have full-time legislatures against 8.7% of Republican ones. In one model legislature type is worth +27 points (p < 0.001) and party is worth +2.9 and nothing statistically (p = 0.74). Do not pitch a party story; it falls apart on the first informed question.
+
+  CAVEAT: trifecta status is a 2026 snapshot applied to a 13-year record. Several
+  states changed control inside the window, so this measure is weak on its face
+  even before the confound. That weakness cuts against the raw result, not the null.
+
+==============================================================================
+ANALYSIS 6. TIME TREND — are budgets getting later as budgets get bigger?
+==============================================================================
+
+-- Miss rate and timing by fiscal year ---------------------------------------
+  FY        n   miss %   mean days   median
+  2015     41     4.9%       -50.4      -42
+  2016     49    16.3%       -28.5      -18
+  2017     41     9.8%       -47.0      -42
+  2018     49    22.4%       -27.0      -19
+  2019     40     7.5%       -54.5      -53
+  2020     49    14.3%       -35.4      -31
+  2021     39    25.6%       -25.6      -18
+  2022     50    14.0%       -32.9      -28
+  2023     41    12.2%       -49.2      -46
+  2024     49    16.3%       -33.0      -29
+  2025     39    12.8%       -46.7      -47
+  2026     47    14.9%       -29.0      -18
+  2027     42    14.3%       -55.4      -54
+
+-- Within-state trend in days-late per year ----------------------------------
+  slope +0.047 days per year  (se 0.364, n=568, p = 0.897)
+
+-- Is there more money to fight over? ----------------------------------------
+  national spending FY2015 -> FY2024: $2.18T -> $3.04T
+    nominal              +40%
+    real, per capita     -0%
+
+  >> FINDING: Budgets are not drifting later. The within-state trend is +0.05 days per year and indistinguishable from flat (p = 0.90). Nor is the premise sound: national spending rose 40% in nominal terms over the decade and -0% per person once inflation and population growth are taken out. There is no growing pot, and no growing delay.
+
+==============================================================================
+ANALYSIS 7. THE STRUCTURAL BASELINE — legislature type, and the four nulls
+==============================================================================
+
+-- Legislature type ----------------------------------------------------------
+                states   on-time   mean days   never missed
+  full-time         18     66.1%        -8.4         5/18   
+  part-time         32     95.9%       -53.1        23/32   
+
+  Mann-Whitney, on-time rate   p = 0.0003
+  Mann-Whitney, mean days      p = 0.0005
+
+-- The nulls, each tested against the same per-state miss rate ---------------
+  state size (log population, controlling for legislature type)   p = 0.91
+  budget cycle (annual n=31 vs biennial n=19)                 p = 0.27
+    (the same comparison pooled over state-years instead: p = 0.049 — clustering ignored, do not quote)
+  per-capita spending level (Spearman vs miss rate)             p = 0.09
+  party control, divided vs unified                            p = 0.95
+
+-- The interaction that does bite --------------------------------------------
+  full-time  + divided   n= 6   mean miss rate  45.7%
+  full-time  + unified   n=12   mean miss rate  28.0%
+  part-time  + divided   n= 5   mean miss rate   0.0%
+  part-time  + unified   n=27   mean miss rate   4.8%
+
+  >> FINDING: Legislature type is the structural variable. Part-time legislatures enact on time 96% of the time against 66% for full-time ones (p = 0.0003), and close 45 days earlier on average (p = 0.0005). State size (p = 0.91), budget cycle (p = 0.27), spending level (p = 0.09) and party control (p = 0.95) are all null. Divided government only converts into missed deadlines where the calendar never forces adjournment.
+
+==============================================================================
                         WHAT TO PUT IN THE WHITE PAPER                        
 ==============================================================================
 1. BUDGET TIMING IS A STATE TRAIT, NOT A YEARLY COIN FLIP.
@@ -218,11 +312,11 @@ ANALYSIS 4. SESSION OVERRUN — does a session running long predict a late budge
    Within a state, every day a session runs past its scheduled adjournment adds about
    0.25 days to the budget's delay (p=2e-06) — a month-long overrun means a budget
    roughly 7 days later than that state's own norm. This is the only one of the
-   four that moves while the outcome is still undecided, and it is exactly the kind
+   analyses that moves while the outcome is still undecided, and it is exactly the kind
    of thing a platform tracking legislative calendars in real time can watch.
 
    Secondary: legislative election years pull budgets about 9 days earlier in
-   annual-cycle states (p=0.007; -11 days under state and year fixed effects,
+   annual-cycle states (p=0.007; +27 days under state and year fixed effects,
    p=0.019).
 
 RULED OUT — and worth saying so, because each is a plausible story that fails:

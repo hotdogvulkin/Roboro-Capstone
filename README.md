@@ -45,7 +45,7 @@ Run `--check` before pushing. If it fails, you edited `index.html` instead of
 
 ## The dashboard
 
-Five views:
+Six views:
 
 | | |
 |---|---|
@@ -54,6 +54,7 @@ Five views:
 | **Watchlist** | FY2028 late-risk, scored and ranked. |
 | **Sessions** | How far each legislature ran past its own scheduled adjournment. |
 | **Findings** | What predicts a late budget, and what turns out not to. |
+| **Open questions** | What the data raises and cannot settle, and the gaps we'd like help closing. |
 
 Every descriptive figure is computed from the dataset at render time rather than typed
 in, so the panels cannot drift from each other or from the data. The only hardcoded
@@ -76,9 +77,16 @@ measure here that moves while the outcome is still undecided — and its blind s
 structural: the year-round legislatures that miss most often never schedule an
 adjournment to overrun.
 
+**Party is the seductive null.** Republican-trifecta states miss 4.7% of budgets against
+22.4% for Democratic ones (p = 0.002) — but 62.5% of Democratic-trifecta states have
+full-time legislatures against 8.7% of Republican ones. Put both in one model and
+legislature type is worth +27 points (p = 0.001) while party is worth nothing (p = 0.74).
+It was professionalism wearing a party label.
+
 **Ruled out**, each a plausible story the data does not support: budget cycle
-(annual vs. biennial), state size, spending level, party control on its own, fiscal
-stress, the national revenue cycle, and year-to-year momentum.
+(annual vs. biennial), state size, spending level, party control, party direction, fiscal
+stress, the national revenue cycle, year-to-year momentum, and budgets getting later over
+time (+0.05 d/yr, p = 0.90 — and national spending is flat per person in real terms).
 
 ## Data
 
@@ -108,8 +116,9 @@ pip install numpy scipy
 python3 budget_timing_predictive_analysis.py
 ```
 
-Prints the full report — four analyses, test statistics, robustness cuts and method
-notes. `budget_timing_predictive_findings.txt` is the saved output of that run.
+Prints the full report — seven analyses, test statistics, robustness cuts and method
+notes, and reproduces **every** figure cited on the dashboard.
+`budget_timing_predictive_findings.txt` is the saved output of that run.
 
 `build_session_overrun.py` rebuilds the session dataset from NCSL calendar PDFs;
 `ncsl_parse.py` is the table parser it uses.

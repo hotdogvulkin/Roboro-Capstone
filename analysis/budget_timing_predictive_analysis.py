@@ -47,6 +47,8 @@ import numpy as np
 from scipy import stats
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# The datasets live in ../data/ alongside the published page, not next to this script.
+DATA = os.path.join(os.path.dirname(HERE), "data")
 random.seed(7)
 np.random.seed(7)
 
@@ -54,7 +56,7 @@ W = 78  # report width
 
 
 def load(name):
-    with open(os.path.join(HERE, name)) as fh:
+    with open(os.path.join(DATA, name)) as fh:
         return list(csv.DictReader(fh))
 
 
@@ -489,7 +491,8 @@ finding(
 
 head(4, "SESSION OVERRUN — does a session running long predict a late budget?")
 
-OVERRUN_CSV = os.path.join(HERE, "session_overrun_data.csv")
+OVERRUN_CSV = os.path.join(DATA, "session_overrun_data.csv")
+b4 = p4 = None
 if not os.path.exists(OVERRUN_CSV):
     print("  session_overrun_data.csv not found — skipping. Build it with build_session_overrun.py")
 else:
@@ -660,6 +663,254 @@ else:
         f"often, because they never schedule an adjournment to overrun.")
 
 
+# ---------------------------------------------------------------------------
+head(5, "PARTY DIRECTION — is lateness a red/blue story?")
+# ---------------------------------------------------------------------------
+# Added after the dashboard began citing these figures, so that every p-value on the
+# published page can be reproduced from this repository.
+#
+# This is the most seductive null in the dataset. The raw contrast is large and the
+# obvious control removes all of it, which is worth showing rather than summarising:
+# anyone who sees the raw number will reach for it, and the answer to "but what about
+# party?" should already be on the page.
+TRI = {r["state"]: r for r in load("state_trifecta_status.csv")}
+
+state_rate, state_mean = {}, {}
+for st, years in ENACT_EVENTS.items():
+    missed = sum(1 for fy, ok in years.items()
+                 if not ok or PANEL[st].get(fy, 1) > 0)
+    state_rate[st] = 100 * missed / len(years)
+for st, d in PANEL.items():
+    state_mean[st] = np.mean(list(d.values()))
+
+groups = {g: [st for st in state_rate if TRI[st]["trifecta_2026"] == g]
+          for g in ("R", "D", "divided")}
+
+sub("Raw comparison, no controls")
+print(f"  {'':10}{'states':>7}{'miss rate':>12}{'mean days':>12}{'full-time legs':>16}")
+for g, members in groups.items():
+    ft = sum(1 for st in members if META[st]["legislature_type"] == "full-time")
+    print(f"  {g:10}{len(members):>7}{np.mean([state_rate[s] for s in members]):>11.1f}%"
+          f"{np.mean([state_mean[s] for s in members]):>+12.1f}"
+          f"{ft:>10}/{len(members):<5}")
+
+kw = stats.kruskal(*[[state_rate[s] for s in m] for m in groups.values()])
+mw_rate = stats.mannwhitneyu([state_rate[s] for s in groups["R"]],
+                             [state_rate[s] for s in groups["D"]])
+mw_days = stats.mannwhitneyu([state_mean[s] for s in groups["R"]],
+                             [state_mean[s] for s in groups["D"]])
+print(f"\n  Kruskal-Wallis, all three groups   p = {kw.pvalue:.3f}")
+print(f"  Mann-Whitney R vs D, miss rate     p = {mw_rate.pvalue:.3f}")
+print(f"  Mann-Whitney R vs D, mean days     p = {mw_days.pvalue:.3f}")
+
+sub("The confound")
+ft_share = {g: 100 * sum(1 for st in m if META[st]["legislature_type"] == "full-time") / len(m)
+            for g, m in groups.items()}
+print(f"  share of each group with a full-time legislature:")
+for g in ("R", "D", "divided"):
+    print(f"    {g:10}{ft_share[g]:>7.1f}%")
+print("\n  Legislature type is the strongest structural variable in this dataset")
+print("  (analysis 1 and the on-time gap below), and it is distributed across party")
+print("  groups about as unevenly as it could be. Party here is close to a restatement")
+print("  of professionalism, so the raw contrast above cannot be read as a party effect.")
+
+sub("OLS: miss rate ~ legislature type + party  (state level, n=50)")
+states_sorted = sorted(state_rate)
+X = np.array([[1.0,
+               1.0 if META[s]["legislature_type"] == "full-time" else 0.0,
+               1.0 if TRI[s]["trifecta_2026"] == "D" else 0.0,
+               1.0 if TRI[s]["trifecta_2026"] == "divided" else 0.0]
+              for s in states_sorted])
+yv = np.array([state_rate[s] for s in states_sorted])
+beta, _, rank, _ = np.linalg.lstsq(X, yv, rcond=None)
+resid = yv - X @ beta
+dof = len(yv) - rank
+se = np.sqrt(np.diag(np.linalg.pinv(X.T @ X)) * (resid @ resid / dof))
+names = ["intercept", "full-time legislature", "party = D", "party = divided"]
+party_p = None
+for nm, c, e in zip(names, beta, se):
+    t = c / e
+    pv = 2 * (1 - stats.t.cdf(abs(t), dof))
+    if nm == "party = D":
+        party_p = pv
+    flag = "  <-- significant" if pv < 0.05 else ""
+    print(f"  {nm:26}{c:>+8.2f}  (se {e:5.2f})   p = {pv:.3f}{flag}")
+
+finding("Party direction does not survive the control. Republican-trifecta states miss "
+        f"{np.mean([state_rate[s] for s in groups['R']]):.1f}% of budgets against "
+        f"{np.mean([state_rate[s] for s in groups['D']]):.1f}% for Democratic trifectas "
+        f"(p = {mw_rate.pvalue:.3f}), but {ft_share['D']:.1f}% of Democratic-trifecta states "
+        f"have full-time legislatures against {ft_share['R']:.1f}% of Republican ones. In one "
+        f"model legislature type is worth {beta[1]:+.0f} points (p < 0.001) and party is worth "
+        f"{beta[2]:+.1f} and nothing statistically (p = {party_p:.2f}). Do not pitch a party "
+        "story; it falls apart on the first informed question.")
+print("\n  CAVEAT: trifecta status is a 2026 snapshot applied to a 13-year record. Several")
+print("  states changed control inside the window, so this measure is weak on its face")
+print("  even before the confound. That weakness cuts against the raw result, not the null.")
+
+
+# ---------------------------------------------------------------------------
+head(6, "TIME TREND — are budgets getting later as budgets get bigger?")
+# ---------------------------------------------------------------------------
+sub("Miss rate and timing by fiscal year")
+print(f"  {'FY':<6}{'n':>5}{'miss %':>9}{'mean days':>12}{'median':>9}")
+years = sorted({o["fy"] for o in OBS if o["fy"] >= 2015})
+for fy in years:
+    ev = ENACT_EVENTS
+    n_all = sum(1 for st in ev if fy in ev[st])
+    n_missed = sum(1 for st in ev if fy in ev[st]
+                   and (not ev[st][fy] or PANEL[st].get(fy, 1) > 0))
+    dd = [o["days"] for o in OBS if o["fy"] == fy]
+    print(f"  {fy:<6}{n_all:>5}{100 * n_missed / n_all:>8.1f}%"
+          f"{np.mean(dd):>+12.1f}{np.median(dd):>+9.0f}")
+
+sub("Within-state trend in days-late per year")
+xs, ys = [], []
+for st, d in PANEL.items():
+    if len(d) < 4:
+        continue
+    mx = np.mean(list(d.keys()))
+    my = np.mean(list(d.values()))
+    for fy, v in d.items():
+        xs.append(fy - mx)
+        ys.append(v - my)
+xs, ys = np.array(xs), np.array(ys)
+slope = (xs @ ys) / (xs @ xs)
+resid = ys - slope * xs
+k = sum(1 for d in PANEL.values() if len(d) >= 4)
+se_s = np.sqrt((resid @ resid / (len(xs) - k - 1)) / (xs @ xs))
+t_s = slope / se_s
+p_s = 2 * (1 - stats.norm.cdf(abs(t_s)))
+print(f"  slope {slope:+.3f} days per year  (se {se_s:.3f}, n={len(xs)}, p = {p_s:.3f})")
+
+sub("Is there more money to fight over?")
+SPEND = load("state_spending_timeseries_fy2015_fy2024.csv")
+DEFL = {int(r["year"]): float(r["deflator_to_2024"]) for r in load("cpi_deflators.csv")}
+tot, pop = defaultdict(float), defaultdict(float)
+for r in SPEND:
+    tot[int(r["fiscal_year"])] += float(r["total_expenditures_millions"])
+    pop[int(r["fiscal_year"])] += float(r["population"])
+a, b = 2015, 2024
+nom = 100 * (tot[b] / tot[a] - 1)
+real_pc = 100 * (((tot[b] * 1e6 / pop[b]) * DEFL[b]) / ((tot[a] * 1e6 / pop[a]) * DEFL[a]) - 1)
+print(f"  national spending FY{a} -> FY{b}: ${tot[a] / 1e6:.2f}T -> ${tot[b] / 1e6:.2f}T")
+print(f"    nominal              {nom:+.0f}%")
+print(f"    real, per capita     {real_pc:+.0f}%")
+
+finding(f"Budgets are not drifting later. The within-state trend is {slope:+.2f} days per "
+        f"year and indistinguishable from flat (p = {p_s:.2f}). Nor is the premise sound: "
+        f"national spending rose {nom:.0f}% in nominal terms over the decade and "
+        f"{real_pc:+.0f}% per person once inflation and population growth are taken out. "
+        "There is no growing pot, and no growing delay.")
+
+
+# ---------------------------------------------------------------------------
+head(7, "THE STRUCTURAL BASELINE — legislature type, and the four nulls")
+# ---------------------------------------------------------------------------
+# The dashboard's headline finding and its "what doesn't predict lateness" list came
+# from an earlier pass that lived outside this script. Reproduced here so that every
+# figure cited on the published page can be regenerated from this repository.
+#
+# Unit of analysis is the state, not the state-year: two thirds of the variance sits
+# between states (analysis 1), so pooling state-years would let deep-history states
+# outvote states with a handful of records.
+SPEND_ROWS = load("state_spending_timeseries_fy2015_fy2024.csv")
+pop24, pc24 = {}, {}
+for r in SPEND_ROWS:
+    if int(r["fiscal_year"]) == 2024:
+        pop24[r["state"]] = float(r["population"])
+        pc24[r["state"]] = float(r["per_capita"])
+
+st_rate, st_mean, st_ontime = {}, {}, {}
+for st, years in ENACT_EVENTS.items():
+    missed = sum(1 for fy, ok in years.items() if not ok or PANEL[st].get(fy, 1) > 0)
+    st_rate[st] = 100 * missed / len(years)
+    st_ontime[st] = 100 - st_rate[st]
+for st, d in PANEL.items():
+    st_mean[st] = float(np.mean(list(d.values())))
+
+FT = [s for s in st_rate if META[s]["legislature_type"] == "full-time"]
+PT = [s for s in st_rate if META[s]["legislature_type"] == "part-time"]
+
+sub("Legislature type")
+print(f"  {'':12}{'states':>8}{'on-time':>10}{'mean days':>12}{'never missed':>15}")
+for lab, grp in (("full-time", FT), ("part-time", PT)):
+    never = sum(1 for s in grp if st_rate[s] == 0)
+    print(f"  {lab:12}{len(grp):>8}{np.mean([st_ontime[s] for s in grp]):>9.1f}%"
+          f"{np.mean([st_mean[s] for s in grp]):>+12.1f}{never:>10}/{len(grp):<5}")
+u_on = stats.mannwhitneyu([st_ontime[s] for s in FT], [st_ontime[s] for s in PT])
+u_mn = stats.mannwhitneyu([st_mean[s] for s in FT], [st_mean[s] for s in PT])
+print(f"\n  Mann-Whitney, on-time rate   p = {u_on.pvalue:.4f}")
+print(f"  Mann-Whitney, mean days      p = {u_mn.pvalue:.4f}")
+
+sub("The nulls, each tested against the same per-state miss rate")
+# population, controlling for legislature type
+common = [s for s in st_rate if s in pop24]
+Xp = np.array([[1.0, np.log(pop24[s]),
+                1.0 if META[s]["legislature_type"] == "full-time" else 0.0] for s in common])
+yp = np.array([st_rate[s] for s in common])
+bp, _, rk, _ = np.linalg.lstsq(Xp, yp, rcond=None)
+rp = yp - Xp @ bp
+sep = np.sqrt(np.diag(np.linalg.pinv(Xp.T @ Xp)) * (rp @ rp / (len(yp) - rk)))
+p_pop = 2 * (1 - stats.t.cdf(abs(bp[1] / sep[1]), len(yp) - rk))
+print(f"  state size (log population, controlling for legislature type)   p = {p_pop:.2f}")
+
+ann = [st_rate[s] for s in st_rate if META[s]["budget_cycle"] == "annual"]
+bien = [st_rate[s] for s in st_rate if META[s]["budget_cycle"] == "biennial"]
+p_cycle = stats.mannwhitneyu(ann, bien).pvalue
+print(f"  budget cycle (annual n={len(ann)} vs biennial n={len(bien)})"
+      f"{'':17}p = {p_cycle:.2f}")
+# Worth showing the wrong way round too, because it is the trap this whole script is
+# built to avoid: pooling all 568 state-years and ignoring that they cluster inside 50
+# states turns this null into a "significant" result at p = 0.05.
+_la = [1 if (not ok or PANEL[st].get(fy, 1) > 0) else 0
+       for st, yrs in ENACT_EVENTS.items() if META[st]["budget_cycle"] == "annual"
+       for fy, ok in yrs.items()]
+_lb = [1 if (not ok or PANEL[st].get(fy, 1) > 0) else 0
+       for st, yrs in ENACT_EVENTS.items() if META[st]["budget_cycle"] == "biennial"
+       for fy, ok in yrs.items()]
+_tab = np.array([[sum(_la), len(_la) - sum(_la)], [sum(_lb), len(_lb) - sum(_lb)]])
+print(f"    (the same comparison pooled over state-years instead: "
+      f"p = {stats.chi2_contingency(_tab)[1]:.3f} — clustering ignored, do not quote)")
+
+pc_states = [s for s in st_rate if s in pc24]
+p_spend = stats.spearmanr([pc24[s] for s in pc_states],
+                          [st_rate[s] for s in pc_states]).pvalue
+print(f"  per-capita spending level (Spearman vs miss rate){'':13}p = {p_spend:.2f}")
+
+div = [st_rate[s] for s in st_rate if TRI[s]["trifecta_2026"] == "divided"]
+uni = [st_rate[s] for s in st_rate if TRI[s]["trifecta_2026"] != "divided"]
+p_tri = stats.mannwhitneyu(div, uni).pvalue
+print(f"  party control, divided vs unified{'':28}p = {p_tri:.2f}")
+
+sub("The interaction that does bite")
+for lt in ("full-time", "part-time"):
+    for pc in ("divided", "unified"):
+        grp = [s for s in st_rate if META[s]["legislature_type"] == lt
+               and (TRI[s]["trifecta_2026"] == "divided") == (pc == "divided")]
+        if grp:
+            print(f"  {lt:10} + {pc:8}  n={len(grp):>2}   mean miss rate "
+                  f"{np.mean([st_rate[s] for s in grp]):>5.1f}%")
+
+finding(f"Legislature type is the structural variable. Part-time legislatures enact on time "
+        f"{np.mean([st_ontime[s] for s in PT]):.0f}% of the time against "
+        f"{np.mean([st_ontime[s] for s in FT]):.0f}% for full-time ones (p = {u_on.pvalue:.4f}), "
+        f"and close {abs(np.mean([st_mean[s] for s in PT]) - np.mean([st_mean[s] for s in FT])):.0f} "
+        f"days earlier on average (p = {u_mn.pvalue:.4f}). State size (p = {p_pop:.2f}), budget "
+        f"cycle (p = {p_cycle:.2f}), spending level (p = {p_spend:.2f}) and party control "
+        f"(p = {p_tri:.2f}) are all null. Divided government only converts into missed deadlines "
+        "where the calendar never forces adjournment.")
+
+
+overrun_para = ("""   Within a state, every day a session runs past its scheduled adjournment adds about
+   %.2f days to the budget's delay (p=%.1g) — a month-long overrun means a budget
+   roughly %.0f days later than that state's own norm. This is the only one of the
+   analyses that moves while the outcome is still undecided, and it is exactly the kind
+   of thing a platform tracking legislative calendars in real time can watch.""" %
+   (b4[1], p4, abs(30 * b4[1]))) if b4 is not None else (
+   "   Not computed in this run: session_overrun_data.csv was missing.\n"
+   "   Rebuild it with build_session_overrun.py and rerun.")
+
 print("\n" + "=" * W)
 print("WHAT TO PUT IN THE WHITE PAPER".center(W))
 print("=" * W)
@@ -678,11 +929,7 @@ print(f"""
    noise; history is signal.
 
 3. SESSION OVERRUN IS THE ONE LIVE, IN-SEASON SIGNAL.
-   Within a state, every day a session runs past its scheduled adjournment adds about
-   {b4[1]:.2f} days to the budget's delay (p={p4:.1g}) — a month-long overrun means a budget
-   roughly {abs(30 * b4[1]):.0f} days later than that state's own norm. This is the only one of the
-   four that moves while the outcome is still undecided, and it is exactly the kind
-   of thing a platform tracking legislative calendars in real time can watch.
+{overrun_para}
 
    Secondary: legislative election years pull budgets about {abs(d_ann.mean()):.0f} days earlier in
    annual-cycle states (p={p_ann:.3f}; {beta[1]:+.0f} days under state and year fixed effects,
