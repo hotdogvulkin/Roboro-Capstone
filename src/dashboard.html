@@ -34,7 +34,7 @@ select:hover{border-color:#6E6A99}
 .mode-toggle{display:flex;flex-wrap:wrap;background:#1A1030;border:1px solid #3D2B5E;border-radius:8px;padding:3px;gap:2px;max-width:100%}
 .mode-btn{background:transparent;border:none;color:#9B93B5;font-size:12px;font-family:inherit;font-weight:500;padding:6px 14px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
 .mode-btn:hover{color:#F2EEF7}
-.mode-btn.active{background:#E11D52;color:#fff}
+.mode-btn.active{background:#E60058;color:#fff}
 
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
 .trend-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
@@ -42,7 +42,7 @@ select:hover{border-color:#6E6A99}
 .metric-label{font-size:10px;color:#9B93B5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .metric-val{font-size:26px;font-weight:600;color:#F2EEF7;letter-spacing:-.02em;line-height:1}
 .metric-sub{font-size:11px;color:#6E6A99;margin-top:4px}
-.metric.accent{border-color:#E11D52;border-opacity:.4}
+.metric.accent{border-color:#E60058;border-opacity:.4}
 
 .main{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start}
 .main>*{min-width:0}
@@ -61,7 +61,7 @@ select:hover{border-color:#6E6A99}
 #chart-wrap{position:relative;width:100%;height:280px}
 
 .heat-legend{display:flex;align-items:center;gap:8px;font-size:11px;color:#9B93B5}
-.heat-scale{width:120px;height:10px;border-radius:3px;background:linear-gradient(90deg,#2D1B4E 0%,#E11D52 60%,#7A0F2B 100%)}
+.heat-scale{width:120px;height:10px;border-radius:3px;background:linear-gradient(90deg,#2D1B4E 0%,#E60058 60%,#7D002E 100%)}
 .heat-scale.spend-scale{background:linear-gradient(90deg,#60A5FA 0%,#7C3AED 55%,#4C1D95 100%)}
 .heat-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .heat-swatch.hatched{background:repeating-linear-gradient(45deg,#2D1B4E,#2D1B4E 2px,#1A1030 2px,#1A1030 4px)}
@@ -72,7 +72,7 @@ select:hover{border-color:#6E6A99}
 .heatmap-table thead th{position:sticky;top:0;background:#1A1030;color:#9B93B5;font-weight:500;font-size:9.5px;padding:4px 6px;text-align:center;z-index:2}
 .heatmap-table thead th.corner{position:sticky;left:0;top:0;z-index:3;background:#1A1030;text-align:left}
 .heatmap-table th.row-label{position:sticky;left:0;background:#1A1030;z-index:1;text-align:left;padding:3px 12px 3px 4px;font-weight:500;color:#F2EEF7;white-space:nowrap;font-size:11px;cursor:pointer;border-radius:4px}
-.heatmap-table th.row-label:hover{background:#2D1B4E;color:#E11D52}
+.heatmap-table th.row-label:hover{background:#2D1B4E;color:#E60058}
 .heatmap-table th.row-label .row-sub{display:block;font-size:9px;font-weight:400;color:#6E6A99;margin-top:1px}
 .heatmap-table th.row-label:hover .row-sub{color:#9B93B5}
 
@@ -84,7 +84,7 @@ select:hover{border-color:#6E6A99}
 .src-link{color:#E9A0AF;text-decoration:none;border-bottom:1px dotted #E9A0AF}
 .src-link:hover{color:#F2EEF7;border-color:#F2EEF7}
 .detail-back{background:none;border:none;color:#9B93B5;font-size:11px;font-family:inherit;cursor:pointer;padding:0 0 10px;display:block}
-.detail-back:hover{color:#E11D52}
+.detail-back:hover{color:#E60058}
 
 .spend-block{margin-top:14px;padding-top:12px;border-top:1px solid #2D1B4E}
 .spend-figure{font-size:20px;font-weight:600;color:#F2EEF7;letter-spacing:-.02em}
@@ -144,13 +144,13 @@ select:hover{border-color:#6E6A99}
 .wl-bar{position:relative;height:7px;border-radius:4px;background:#231640;min-width:70px;overflow:hidden}
 .wl-bar span{position:absolute;inset:0 auto 0 0;border-radius:4px}
 .wl-tier{font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:5px;white-space:nowrap}
-.wl-tier.critical{background:rgba(225,29,82,.18);color:#FF8FAE;border:1px solid rgba(225,29,82,.45)}
+.wl-tier.critical{background:rgba(230,0,88,.18);color:#FF8FAE;border:1px solid rgba(230,0,88,.45)}
 .wl-tier.elevated{background:rgba(214,142,42,.16);color:#F0C070;border:1px solid rgba(214,142,42,.4)}
 .wl-tier.watch{background:rgba(120,110,180,.16);color:#B9A8F5;border:1px solid rgba(120,110,180,.4)}
 .wl-tier.low{background:rgba(58,168,122,.14);color:#7FD8AC;border:1px solid rgba(58,168,122,.35)}
 .wl-sig{white-space:nowrap}
 .wl-flag{display:inline-block;font-size:9.5px;color:#9B93B5;background:#1A1030;border:1px solid #2D1B4E;border-radius:4px;padding:2px 6px;margin-right:4px;white-space:nowrap}
-.wl-flag.ft{color:#FF8FAE;border-color:rgba(225,29,82,.35)}
+.wl-flag.ft{color:#FF8FAE;border-color:rgba(230,0,88,.35)}
 .wl-flag.elec{color:#7FD8AC;border-color:rgba(58,168,122,.3)}
 /* Record and Typical stay on one line: the three states carrying a "· n with no budget
    at all" clause were wrapping to three lines and standing 97px tall against 45px for
@@ -162,7 +162,7 @@ select:hover{border-color:#6E6A99}
 .wl-val{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:2px 0 22px}
 
 /* ---- Open questions ----------------------------------------------------- */
-.oq-q{background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E11D52;border-radius:9px;padding:15px 17px;margin-bottom:11px}
+.oq-q{background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E60058;border-radius:9px;padding:15px 17px;margin-bottom:11px}
 .oq-q .oq-num{font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6E6A99;margin-bottom:6px}
 .oq-q .oq-h{font-size:14px;font-weight:600;color:#F2EEF7;line-height:1.4;margin-bottom:7px;letter-spacing:-.01em}
 .oq-q .oq-b{font-size:12px;color:#B0A8C8;line-height:1.65}
@@ -218,8 +218,8 @@ select:hover{border-color:#6E6A99}
 .detail-key{font-size:12px;color:#9B93B5}
 .detail-val{font-size:12px;font-weight:500;color:#F2EEF7}
 .detail-note{margin-top:14px;font-size:11px;color:#6E6A99;line-height:1.6;padding-top:12px;border-top:1px solid #2D1B4E}
-.ask-btn{margin-top:14px;width:100%;background:transparent;border:1px solid #E11D52;color:#E11D52;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;transition:background .15s}
-.ask-btn:hover{background:rgba(225,29,82,.1)}
+.ask-btn{margin-top:14px;width:100%;background:transparent;border:1px solid #E60058;color:#E60058;border-radius:8px;padding:8px 12px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;transition:background .15s}
+.ask-btn:hover{background:rgba(230,0,88,.1)}
 
 .footer{margin-top:32px;padding-top:20px;border-top:1px solid #2D1B4E;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .footer-note{font-size:11px;color:#6E6A99}
@@ -880,7 +880,7 @@ function renderOverrun(){
     const pos=b.mean>=0;
     return`<div class="ov-band"><div class="ob-k">${b.k}</div>`+
       `<div class="ob-track"><div class="ob-fill" style="${pos?'left:50%':'right:50%;left:auto'};`+
-      `width:${w.toFixed(1)}%;background:${pos?'#D61D52':'#3AA87A'}"></div><div class="ob-zero"></div></div>`+
+      `width:${w.toFixed(1)}%;background:${pos?'#E60058':'#3AA87A'}"></div><div class="ob-zero"></div></div>`+
       `<div><span class="ob-v ${pos?'ov-late':'ov-early'}">${pos?'+':''}${b.mean.toFixed(1)}d</span>`+
       ` <span class="ob-n">n=${b.n}</span></div></div>`;
   }).join('');
@@ -1350,7 +1350,7 @@ function perStateMiss(){
 }
 const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
 function missColor(pct){
-  const t=Math.max(0,Math.min(1,pct/60)),base=[27,17,50],hot=[225,29,82];
+  const t=Math.max(0,Math.min(1,pct/60)),base=[27,17,50],hot=[230,0,88];
   const c=base.map((v,i)=>Math.round(v+(hot[i]-v)*t));
   return`rgb(${c[0]},${c[1]},${c[2]})`;
 }
@@ -1562,7 +1562,7 @@ function renderTrendStats(){
 function heatColor(daysLate){
   const cap=150;
   const t=Math.max(0,Math.min(1,daysLate/cap));
-  const base=[45,27,78],mid=[225,29,82],hot=[122,15,43];
+  const base=[45,27,78],mid=[230,0,88],hot=[125,0,46];
   let c;
   if(t<=0.6){const k=t/0.6;c=base.map((v,i)=>Math.round(v+(mid[i]-v)*k))}
   else{const k=(t-0.6)/0.4;c=mid.map((v,i)=>Math.round(v+(hot[i]-v)*k))}
