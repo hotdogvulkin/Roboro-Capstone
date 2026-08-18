@@ -9,7 +9,7 @@
 <meta name="description" content="How late does each state enact its budget? 651 state-fiscal-years, FY2015-FY2027, verified against primary sources — with a forward-looking risk model for FY2028.">
 <meta name="author" content="Grant Garcia">
 <meta name="color-scheme" content="dark">
-<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBCMDYxNCIvPjxjaXJjbGUgY3g9IjExIiBjeT0iMTEiIHI9IjUiIGZpbGw9IiNFMTFENTIiLz48Y2lyY2xlIGN4PSIyMSIgY3k9IjExIiByPSI1IiBmaWxsPSIjNkU2QTk5Ii8+PGNpcmNsZSBjeD0iMTEiIGN5PSIyMSIgcj0iNSIgZmlsbD0iIzZFNkE5OSIgb3BhY2l0eT0iLjUiLz48Y2lyY2xlIGN4PSIyMSIgY3k9IjIxIiByPSI1IiBmaWxsPSIjRTExRDUyIiBvcGFjaXR5PSIuNCIvPjwvc3ZnPg==">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xNiAxNi41IDk2IDk2Ij48cmVjdCB4PSItMTYiIHk9IjE2LjUiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgcng9IjIwIiBmaWxsPSIjMEIwNjE0Ii8+PHBhdGggZmlsbD0iI0YyRUVGNyIgZD0iTTQ3LjcsNjQuN2M4LjgsMCwxNi03LjIsMTYtMTYuMXMtNy4yLTE2LjEtMTYtMTYuMXMtMTYsNy4yLTE2LDE2LjFTMzguOCw2NC43LDQ3LjcsNjQuN3oiLz48cGF0aCBmaWxsPSIjRTYwMDU4IiBkPSJNMCw0OC42YzAsOC45LDcuMiwxNi4xLDE2LDE2LjFWMzIuNUM3LjIsMzIuNSwwLDM5LjcsMCw0OC42eiIvPjxwYXRoIGZpbGw9IiNGMkVFRjciIGQ9Ik0xNiwxMTIuNWM4LjgsMCwxNi03LjIsMTYtMTYuMXMtNy4yLTE2LjEtMTYtMTYuMVMwLDg3LjUsMCw5Ni40UzcuMiwxMTIuNSwxNiwxMTIuNXoiLz48L3N2Zz4=">
 <meta property="og:type" content="website">
 <meta property="og:title" content="State Budget Timing — All 50 States">
 <meta property="og:description" content="How late does each state enact its budget? 651 state-fiscal-years, FY2015-FY2027, verified against primary sources — with a forward-looking risk model for FY2028.">
@@ -46,16 +46,11 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#0B0614;color:#F2EEF7;min-height:100vh;padding:0}
 
-.topbar{background:#0B0614;border-bottom:1px solid #2D1B4E;padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-dots{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:22px;height:22px}
-.brand-dots span{border-radius:50%}
-.brand-dots span:nth-child(1){background:#E11D52}
-.brand-dots span:nth-child(2){background:#6E6A99}
-.brand-dots span:nth-child(3){background:#6E6A99;opacity:.5}
-.brand-dots span:nth-child(4){background:#E11D52;opacity:.4}
-.brand-name{font-size:15px;font-weight:600;color:#F2EEF7;letter-spacing:-.01em}
-.brand-tag{font-size:11px;color:#9B93B5;margin-top:1px}
+.topbar{background:#0B0614;border-bottom:1px solid #2D1B4E;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-logo{height:21px;width:auto;display:block;flex-shrink:0}
+.brand-rule{width:1px;height:16px;background:#3D2B5E;flex-shrink:0}
+.brand-tag{font-size:11px;color:#9B93B5;white-space:nowrap}
 .proto-badge{font-size:10px;font-weight:500;background:#2D1B4E;color:#9B93B5;padding:3px 10px;border-radius:999px;border:1px solid #3D2B5E}
 
 .page{max-width:1200px;margin:0 auto;padding:28px 32px}
@@ -282,6 +277,10 @@ select:hover{border-color:#6E6A99}
   .wl-val{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
 }
 @media (max-width:560px){
+  .topbar{padding:12px 16px}
+  /* Wordmark only — the tagline and its divider are the first thing to go when the
+     prototype badge and the logo start competing for the same row. */
+  .brand-rule,.brand-tag{display:none}
   .page-head h1{font-size:26px}
   .chart-card{padding:15px}
   .mode-btn{padding:6px 10px;font-size:12px}
@@ -300,13 +299,9 @@ select:hover{border-color:#6E6A99}
 
 <div class="topbar">
   <div class="brand">
-    <div class="brand-dots">
-      <span></span><span></span><span></span><span></span>
-    </div>
-    <div>
-      <div class="brand-name">Roboro</div>
-      <div class="brand-tag">Legislative intelligence</div>
-    </div>
+    <svg class="brand-logo" viewBox="0 0 576 113" role="img" aria-label="Roboro"><path fill="#F2EEF7" d="M47.7,64.7c8.8,0,16-7.2,16-16.1s-7.2-16.1-16-16.1s-16,7.2-16,16.1S38.8,64.7,47.7,64.7z"/><path fill="#E60058" d="M0,48.6c0,8.9,7.2,16.1,16,16.1V32.5C7.2,32.5,0,39.7,0,48.6z"/><path fill="#F2EEF7" d="M16,112.5c8.8,0,16-7.2,16-16.1s-7.2-16.1-16-16.1S0,87.5,0,96.4S7.2,112.5,16,112.5z"/><path fill="#F2EEF7" d="M140.9,112.5h-23.6V76.7C117.3,55,134.4,33,167,33v23.8c-18,0-26.1,10-26.1,19.9V112.5z"/><path fill="#F2EEF7" d="M464.3,112.5h-23.6V76.7c0-21.7,17.1-43.7,49.7-43.7v23.8c-18,0-26.1,10-26.1,19.9V112.5z"/><path fill="#F2EEF7" d="M211.3,113c-22.7,0-41.2-18.2-41.2-40.6s18.5-40.6,41.2-40.6s41.2,18.2,41.2,40.6C252.6,94.8,234.1,113,211.3,113z M211.3,55.6c-9.7,0-17.6,7.5-17.6,16.8s7.9,16.8,17.6,16.8c9.7,0,17.6-7.5,17.6-16.8C228.9,63.2,221,55.6,211.3,55.6z"/><path fill="#F2EEF7" d="M391.8,113c-22.7,0-41.2-18.2-41.2-40.6s18.5-40.6,41.2-40.6S433,50,433,72.4S414.5,113,391.8,113z M391.8,55.6c-9.7,0-17.6,7.5-17.6,16.8s7.9,16.8,17.6,16.8s17.6-7.5,17.6-16.8C409.4,63.2,401.5,55.6,391.8,55.6z"/><path fill="#F2EEF7" d="M534.8,113c-22.7,0-41.2-18.2-41.2-40.6s18.5-40.6,41.2-40.6S576,50,576,72.4S557.5,113,534.8,113z M534.8,55.6c-9.7,0-17.6,7.5-17.6,16.8s7.9,16.8,17.6,16.8c9.7,0,17.6-7.5,17.6-16.8C552.4,63.2,544.5,55.6,534.8,55.6z"/><path fill="#F2EEF7" d="M302.7,31.8c-6.3,0-12.3,1.4-17.6,3.9V0h-23.6v71.6l0,0c0,0.3,0,0.6,0,0.9c0,22.4,18.5,40.6,41.2,40.6s41.2-18.2,41.2-40.6C344,50,325.5,31.8,302.7,31.8z M302.7,89.2c-9.7,0-17.6-7.5-17.6-16.8s7.9-16.8,17.6-16.8s17.6,7.5,17.6,16.8C320.3,81.7,312.4,89.2,302.7,89.2z"/></svg>
+    <span class="brand-rule"></span>
+    <div class="brand-tag">Legislative intelligence</div>
   </div>
   <span class="proto-badge">Capstone prototype · Summer 2026</span>
 </div>

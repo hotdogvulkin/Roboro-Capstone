@@ -93,13 +93,17 @@ def build_html() -> str:
                         + chart + '\n</script>')
 
     # --- metadata ---------------------------------------------------------
+    # The real mark, lifted from src/vendor/roboro-logo.svg — the three shapes at the
+    # left of the wordmark, in their original coordinates. viewBox frames them square
+    # with padding. Was a hand-drawn four-dot approximation before the brand asset existed.
     favicon = (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
-        '<rect width="32" height="32" rx="7" fill="#0B0614"/>'
-        '<circle cx="11" cy="11" r="5" fill="#E11D52"/>'
-        '<circle cx="21" cy="11" r="5" fill="#6E6A99"/>'
-        '<circle cx="11" cy="21" r="5" fill="#6E6A99" opacity=".5"/>'
-        '<circle cx="21" cy="21" r="5" fill="#E11D52" opacity=".4"/></svg>')
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 16.5 96 96">'
+        '<rect x="-16" y="16.5" width="96" height="96" rx="20" fill="#0B0614"/>'
+        '<path fill="#F2EEF7" d="M47.7,64.7c8.8,0,16-7.2,16-16.1s-7.2-16.1-16-16.1'
+        's-16,7.2-16,16.1S38.8,64.7,47.7,64.7z"/>'
+        '<path fill="#E60058" d="M0,48.6c0,8.9,7.2,16.1,16,16.1V32.5C7.2,32.5,0,39.7,0,48.6z"/>'
+        '<path fill="#F2EEF7" d="M16,112.5c8.8,0,16-7.2,16-16.1s-7.2-16.1-16-16.1'
+        'S0,87.5,0,96.4S7.2,112.5,16,112.5z"/></svg>')
     fav = base64.b64encode(favicon.encode()).decode()
     meta = f'''<meta name="description" content="{DESCRIPTION}">
 <meta name="author" content="Grant Garcia">
