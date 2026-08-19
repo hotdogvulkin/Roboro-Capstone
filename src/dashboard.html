@@ -1522,16 +1522,16 @@ function renderFindings(){
 // Static, dataset-wide summary stats for the stats bar above the heatmap.
 // Computed once from the full TIMELINE/SPENDING data — not affected by the region/cycle filters.
 function renderTrendStats(){
-  const dated=TIMELINE.filter(t=>t.daysLate!==null);
+  const dated=TIMELINE.filter(t=>t.daysLate!==null&&!t.carryover);
   const onTimeCount=dated.filter(t=>t.daysLate<=0).length;
   const onTimeRate=Math.round(onTimeCount/dated.length*100);
   document.getElementById('stat-ontime').textContent=`${onTimeRate}%`;
-  document.getElementById('stat-ontime-sub').textContent=`${onTimeCount} of ${dated.length} state-fiscal-years`;
+  document.getElementById('stat-ontime-sub').textContent=`${onTimeCount} of ${dated.length} budgets a legislature actually wrote`;
 
   const late=dated.filter(t=>t.daysLate>0);
   const avgLate=Math.round(late.reduce((a,t)=>a+t.daysLate,0)/late.length);
   document.getElementById('stat-avglate').textContent=`+${avgLate}d`;
-  document.getElementById('stat-avglate-sub').textContent=`across ${late.length} late state-fiscal-years`;
+  document.getElementById('stat-avglate-sub').textContent=`across the ${late.length} that missed`;
 
   const totalM=Object.values(SPENDING).reduce((a,s)=>a+s.total,0);
   const totalPop=Object.values(SPENDING).reduce((a,s)=>a+s.population,0);
@@ -1918,7 +1918,7 @@ function updateMetrics(data){
     <div class="metric"><div class="metric-label">On time</div><div class="metric-val">${ontime}</div><div class="metric-sub">of ${data.length} states shown</div></div>
     <div class="metric"><div class="metric-label">Avg days late</div><div class="metric-val">${avgLate}</div><div class="metric-sub">among late states only</div></div>
     <div class="metric"><div class="metric-label">No-budget years</div><div class="metric-val">${nobudget}</div><div class="metric-sub">states with ≥1 on record</div></div>
-    <div class="metric"><div class="metric-label">Budget-years tracked</div><div class="metric-val">${tracked}</div><div class="metric-sub">verified state-fiscal-years</div></div>
+    <div class="metric"><div class="metric-label">Budget-years tracked</div><div class="metric-val">${tracked}</div><div class="metric-sub">budgets written by the states shown<br>(two-year carryovers excluded)</div></div>
   `;
 }
 
@@ -2134,10 +2134,12 @@ document.getElementById('heatmap-sort-filter').addEventListener('change',()=>{up
   const exact=TIMELINE.filter(t=>t.precision==='exact').length;
   const est=TIMELINE.filter(t=>t.precision==='month-level estimate').length;
   document.getElementById('footer-note').innerHTML=
-    `${TIMELINE.length} state-fiscal-years, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]}, verified `+
-    `against primary sources — ${exact} exact signing dates, ${est} dated to the month where no `+
-    `source gives the day, ${TIMELINE.length-exact-est} with no budget enacted. `+
-    `Session data covers ${OVERRUN.length} sittings.`;
+    `${TIMELINE.length} state-fiscal-years in the dataset, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]} — `+
+    `${exact} with an exact signing date, ${est} dated to the month where no source gives the `+
+    `day, ${TIMELINE.length-exact-est} where no budget was enacted. Of these, ${d.length} are `+
+    `budgets a legislature actually wrote; the other ${TIMELINE.length-d.length} are years `+
+    `covered by a two-year budget passed in an earlier session. Session data covers `+
+    `${OVERRUN.length} sittings.`;
 })();
 
 renderTrendStats();
