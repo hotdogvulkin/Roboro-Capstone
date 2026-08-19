@@ -164,6 +164,7 @@ select:hover{border-color:#6E6A99}
 .lede{margin-top:16px;padding:14px 18px;background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E60058;border-radius:9px;font-size:13.5px;line-height:1.65;color:#C9C2DB;max-width:820px}
 .lede b{color:#F2EEF7;font-weight:600}
 .asof{margin-top:9px;font-size:11px;color:#6E6A99}
+.chart-note{font-size:11px;color:#9B93B5;line-height:1.6;margin-top:10px;padding-top:9px;border-top:1px solid #2D1B4E}
 /* ---- Open questions ----------------------------------------------------- */
 .oq-q{background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E60058;border-radius:9px;padding:15px 17px;margin-bottom:11px}
 .oq-q .oq-num{font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6E6A99;margin-bottom:6px}
@@ -306,6 +307,10 @@ select:hover{border-color:#6E6A99}
       </select>
     </div>
     <div class="divider" id="sort-divider"></div>
+    <div class="ctrl-group" id="year-group">
+      <label>Budget year</label>
+      <select id="year-filter"><option value="all">All years (average)</option></select>
+    </div>
     <div class="ctrl-group" id="sort-group">
       <label>Sort by</label>
       <select id="sort-filter">
@@ -342,6 +347,7 @@ select:hover{border-color:#6E6A99}
       <div class="chart-header">
         <div>
           <div class="chart-title" id="chart-title-text">Avg. days past fiscal year start — budget enacted</div>
+          <div class="chart-note" id="chart-note" style="display:none"></div>
           <div class="chart-sub" id="chart-sub-text">Below zero = enacted before the fiscal year began. Click any bar to see state detail.</div>
         </div>
         <div class="legend" id="snapshot-legend">
@@ -1943,12 +1949,48 @@ let mode='snapshot';
 let currentDetailState=null;
 let chart,filtered=[...STATES];
 
+// A 14-year average answers "what is normal here" but not "what happened this year",
+// which is the first thing most people want. Selecting a year re-reads every state's
+// bar from that single fiscal year instead of its mean.
+//
+// Not every state decides a budget every year: biennial states spend alternate years
+// covered by a two-year budget passed earlier. Those have no value to plot for that
+// year, so they drop out of the chart and are named underneath rather than silently
+// vanishing or being drawn as zero.
+(function fillYears(){
+  const sel=document.getElementById('year-filter');
+  [...new Set(TIMELINE.map(t=>t.year))].sort((a,b)=>b-a).forEach(y=>{
+    const o=document.createElement('option');
+    o.value=String(y); o.textContent='FY'+y;
+    sel.appendChild(o);
+  });
+})();
+
+function selectedYear(){
+  const v=document.getElementById('year-filter').value;
+  return v==='all'?null:+v;
+}
+
+// STATES carries whole-period aggregates. For a single year, return a shallow copy with
+// the plotted value swapped for that year's, plus why a state has no value if it doesn't.
+function statesForView(){
+  const y=selectedYear();
+  if(y===null)return STATES.map(s=>({...s,_reason:null}));
+  return STATES.map(s=>{
+    const rec=(BY_STATE[s.s]||[]).find(r=>r.year===y);
+    if(!rec)          return{...s,avgDays:null,_reason:'no record for this year'};
+    if(rec.carryover) return{...s,avgDays:null,_reason:'covered by a two-year budget'};
+    if(!rec.enacted)  return{...s,avgDays:null,_reason:'no budget enacted'};
+    return{...s,avgDays:rec.daysLate,onTimeRate:rec.daysLate<=0?100:0,_reason:null,_rec:rec};
+  });
+}
+
 function getFiltered(){
   const r=document.getElementById('region-filter').value;
   const s=document.getElementById('sort-filter').value;
   const c=document.getElementById('cycle-filter').value;
   const g=document.getElementById('gov-filter').value;
-  let f=STATES.filter(x=>(r==='all'||x.r===r)&&(c==='all'||x.cycle===c)&&govMatches(g,x.trifecta));
+  let f=statesForView().filter(x=>(r==='all'||x.r===r)&&(c==='all'||x.cycle===c)&&govMatches(g,x.trifecta));
   if(s==='days')f.sort((a,b)=>b.avgDays-a.avgDays);
   else if(s==='alpha')f.sort((a,b)=>a.s.localeCompare(b.s));
   else f.sort((a,b)=>a.onTimeRate-b.onTimeRate);
@@ -1956,22 +1998,60 @@ function getFiltered(){
 }
 
 function updateMetrics(data){
-  const ontime=data.filter(s=>s.avgDays<=0).length;
-  const lateOnes=data.filter(s=>s.avgDays>0);
+  // Guard the null case explicitly: in a single-year view a state with no budget has
+  // avgDays === null, and `null <= 0` is true in JavaScript — so without this every
+  // state that failed to pass a budget was being counted as on time.
+  const yr=selectedYear();
+  const plotted=data.filter(s=>s.avgDays!==null);
+  const ontime=plotted.filter(s=>s.avgDays<=0).length;
+  const lateOnes=plotted.filter(s=>s.avgDays>0);
   const avgLate=lateOnes.length?Math.round(lateOnes.reduce((a,s)=>a+s.avgDays,0)/lateOnes.length):0;
-  const nobudget=data.filter(s=>s.nobudget>0).length;
-  // Replaces a hand-seeded "veto battles" figure that had no source in the data.
-  const tracked=data.reduce((a,s)=>a+(s.tracked||0),0);
+  const noBudget=yr===null
+    ? data.filter(s=>s.nobudget>0).length
+    : data.filter(s=>s._reason==='no budget enacted').length;
+  const tracked=yr===null
+    ? data.reduce((a,s)=>a+(s.tracked||0),0)
+    : plotted.length;
   document.getElementById('metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">On time</div><div class="metric-val">${ontime}</div><div class="metric-sub">of ${data.length} states shown</div></div>
+    <div class="metric"><div class="metric-label">On time</div><div class="metric-val">${ontime}</div><div class="metric-sub">of ${plotted.length} ${yr===null?'states shown':'that wrote an FY'+yr+' budget'}</div></div>
     <div class="metric"><div class="metric-label">Avg days late</div><div class="metric-val">${avgLate}</div><div class="metric-sub">among late states only</div></div>
-    <div class="metric"><div class="metric-label">No-budget years</div><div class="metric-val">${nobudget}</div><div class="metric-sub">states with ≥1 on record</div></div>
-    <div class="metric"><div class="metric-label">Budget-years tracked</div><div class="metric-val">${tracked}</div><div class="metric-sub">budgets written by the states shown<br>(two-year carryovers excluded)</div></div>
+    <div class="metric"><div class="metric-label">No-budget ${yr===null?'years':'states'}</div><div class="metric-val">${noBudget}</div><div class="metric-sub">${yr===null?'states with ≥1 on record':'entered FY'+yr+' with none enacted'}</div></div>
+    <div class="metric"><div class="metric-label">${yr===null?'Budget-years tracked':'Budgets decided'}</div><div class="metric-val">${tracked}</div><div class="metric-sub">${yr===null?'budgets written by the states shown<br>(two-year carryovers excluded)':'states that actually wrote one in FY'+yr}</div></div>
   `;
 }
 
-function renderChart(data){
+function renderChart(dataIn){
+  // States with nothing to plot this year are excluded and named below the chart.
+  const dropped=dataIn.filter(s=>s.avgDays===null);
+  const data=dataIn.filter(s=>s.avgDays!==null);
   filtered=data;
+
+  // The early tail was swallowing the chart: Wyoming averages 149 days early, so every
+  // state that actually misses its deadline was compressed into the top inch. The axis
+  // now stops at a floor and the states beyond it are listed underneath with their real
+  // values, rather than being silently rescaled away or quietly clipped.
+  const FLOOR=-90;
+  const clipped=data.filter(s=>s.avgDays<FLOOR);
+  const note=document.getElementById('chart-note');
+  const bits=[];
+  if(clipped.length){
+    const sorted=clipped.slice().sort((a,b)=>a.avgDays-b.avgDays);
+    const head=sorted.slice(0,5).map(s=>`${s.ab} ${s.avgDays}d`).join(', ');
+    bits.push(`Axis stops at ${FLOOR}d so the states that miss stay readable. `+
+      `${clipped.length} enact earlier: ${head}`+
+      (sorted.length>5?` and ${sorted.length-5} more.`:'.'));
+  }
+  if(dropped.length){
+    const byReason={};
+    dropped.forEach(s=>{(byReason[s._reason]=byReason[s._reason]||[]).push(s.ab)});
+    bits.push(`${dropped.length} not shown — `+
+      Object.entries(byReason)
+        .map(([r,ab])=>`${ab.length} ${r} (${ab.sort().join(', ')})`)
+        .join('; ')+'.');
+  }
+  note.innerHTML=bits.join(' ');
+  note.style.display=bits.length?'block':'none';
+
   if(chart)chart.destroy();
   chart=new Chart(document.getElementById('myChart'),{
     type:'bar',
@@ -2006,7 +2086,7 @@ function renderChart(data){
       }},
       scales:{
         x:{grid:{display:false},ticks:{color:'#9B93B5',font:{size:9.5},maxRotation:0}},
-        y:{grid:{color:'rgba(110,106,153,.15)'},ticks:{color:'#9B93B5',font:{size:10},
+        y:{min:-90,grid:{color:'rgba(110,106,153,.15)'},ticks:{color:'#9B93B5',font:{size:10},
           callback:v=>v===0?'FY start':(v>0?`+${v}d`:`${v}d`)}}
       },
       onClick:(e,els)=>{if(els.length)showDetail(filtered[els[0].index])}
@@ -2134,6 +2214,7 @@ function setMode(m){
   document.getElementById('findings-wrap').style.display=m==='findings'?'block':'none';
   document.getElementById('open-wrap').style.display=isOpen?'block':'none';
   document.getElementById('sort-group').style.display=m==='snapshot'?'flex':'none';
+  document.getElementById('year-group').style.display=m==='snapshot'?'flex':'none';
   document.getElementById('sort-divider').style.display=m==='snapshot'?'block':'none';
   document.getElementById('snapshot-legend').style.display=m==='snapshot'?'flex':'none';
   document.getElementById('heatmap-controls').style.display=m==='trend'?'flex':'none';
@@ -2145,8 +2226,11 @@ function setMode(m){
   document.getElementById('filter-groups').style.display=isFind?'none':'contents';
   document.getElementById('metrics').style.display=isFind?'none':'grid';
   document.querySelector('.main').classList.toggle('findings-mode',isFind);
+  const yr=selectedYear();
   document.getElementById('chart-title-text').textContent=m==='snapshot'
-    ?`Avg. days past fiscal year start — budget enacted (FY${YEARS[0]}–FY${YEARS[YEARS.length-1]})`
+    ?(yr===null
+       ?`Avg. days past fiscal year start — budget enacted (FY${YEARS[0]}–FY${YEARS[YEARS.length-1]})`
+       :`Days past fiscal year start — FY${yr} budgets`)
     :isWatch?`Who is likely to be late next?`
     :isSess?`The signal that moves while the budget is still in play`
     :isOpen?'What we still don’t know'
@@ -2163,6 +2247,7 @@ function setMode(m){
 
 document.getElementById('region-filter').addEventListener('change',refresh);
 document.getElementById('sort-filter').addEventListener('change',refresh);
+document.getElementById('year-filter').addEventListener('change',()=>{setMode('snapshot')});
 document.getElementById('cycle-filter').addEventListener('change',refresh);
 document.getElementById('gov-filter').addEventListener('change',refresh);
 document.getElementById('mode-snapshot').addEventListener('click',()=>setMode('snapshot'));
