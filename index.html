@@ -547,56 +547,56 @@ select:hover{border-color:#6E6A99}
 
 <script>
 const STATES=[
-  {s:"Alabama",ab:"AL",r:"South",fy:"Oct 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:12,onTimeRate:67,vetoes:0,nobudget:0,note:"Historically reliable, mild late tendency"},
-  {s:"Alaska",ab:"AK",r:"West",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"no",avgDays:38,onTimeRate:33,vetoes:1,nobudget:0,note:"Frequent delays tied to oil revenue uncertainty"},
-  {s:"Arizona",ab:"AZ",r:"West",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"no",avgDays:55,onTimeRate:17,vetoes:2,nobudget:0,note:"Persistent late budgets, frequent veto battles"},
-  {s:"Arkansas",ab:"AR",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:3,onTimeRate:83,vetoes:0,nobudget:0,note:"Generally on time; part-time legislature keeps sessions short"},
-  {s:"California",ab:"CA",r:"West",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"yes",avgDays:-8,onTimeRate:83,vetoes:0,nobudget:0,note:"Constitutional deadline with pay penalty for legislators"},
-  {s:"Colorado",ab:"CO",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"D",dl:"no",avgDays:-5,onTimeRate:100,vetoes:0,nobudget:0,note:"Rarely late; TABOR constraints focus negotiations early"},
-  {s:"Connecticut",ab:"CT",r:"Northeast",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"D",dl:"no",avgDays:42,onTimeRate:33,vetoes:1,nobudget:1,note:"Recurring impasses; 2017 operated 5 months without budget"},
-  {s:"Delaware",ab:"DE",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"D",dl:"no",avgDays:-3,onTimeRate:100,vetoes:0,nobudget:0,note:"Consistently on time; small, unified legislature"},
-  {s:"Florida",ab:"FL",r:"South",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"R",dl:"no",avgDays:-12,onTimeRate:100,vetoes:0,nobudget:0,note:"One of the most reliable states; strict deadline culture"},
-  {s:"Georgia",ab:"GA",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-6,onTimeRate:100,vetoes:0,nobudget:0,note:"Consistently enacted before fiscal year start"},
-  {s:"Hawaii",ab:"HI",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"D",dl:"no",avgDays:8,onTimeRate:67,vetoes:0,nobudget:0,note:"Mild delays; island logistics add complexity"},
-  {s:"Idaho",ab:"ID",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-10,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time legislature; reliably finishes early"},
-  {s:"Illinois",ab:"IL",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:91,onTimeRate:17,vetoes:2,nobudget:2,note:"2015–2017: operated 736 days without a full budget"},
-  {s:"Indiana",ab:"IN",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-4,onTimeRate:100,vetoes:0,nobudget:0,note:"Biennial system; almost always finishes on time"},
-  {s:"Iowa",ab:"IA",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:5,onTimeRate:67,vetoes:0,nobudget:0,note:"Occasional modest delays; generally functional"},
-  {s:"Kansas",ab:"KS",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"divided",dl:"no",avgDays:18,onTimeRate:50,vetoes:1,nobudget:0,note:"Tax-cut battles have caused recurring late budgets"},
-  {s:"Kentucky",ab:"KY",r:"South",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"divided",dl:"no",avgDays:7,onTimeRate:67,vetoes:0,nobudget:0,note:"Biennial system; mild delays in contested years"},
-  {s:"Louisiana",ab:"LA",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:1,onTimeRate:83,vetoes:0,nobudget:0,note:"Generally timely; constitutional deadline enforced"},
-  {s:"Maine",ab:"ME",r:"Northeast",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"D",dl:"no",avgDays:22,onTimeRate:50,vetoes:1,nobudget:0,note:"Divided government leads to frequent delays"},
-  {s:"Maryland",ab:"MD",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:-4,onTimeRate:100,vetoes:0,nobudget:0,note:"Governor submits early; legislature rarely misses deadline"},
-  {s:"Massachusetts",ab:"MA",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:148,onTimeRate:0,vetoes:0,nobudget:0,note:"Chronically late; has not passed on time in decades"},
-  {s:"Michigan",ab:"MI",r:"Midwest",fy:"Oct 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"no",avgDays:14,onTimeRate:50,vetoes:1,nobudget:0,note:"Oct 1 FY start; partisan battles cause frequent delays"},
-  {s:"Minnesota",ab:"MN",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"divided",dl:"no",avgDays:35,onTimeRate:33,vetoes:2,nobudget:1,note:"2021 operated without budget; divided govt common"},
-  {s:"Mississippi",ab:"MS",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:2,onTimeRate:83,vetoes:0,nobudget:0,note:"Reliably near deadline; functional process"},
-  {s:"Missouri",ab:"MO",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:0,onTimeRate:83,vetoes:1,nobudget:0,note:"Generally on time despite partisan friction"},
-  {s:"Montana",ab:"MT",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-8,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time biennial legislature; very reliable"},
-  {s:"Nebraska",ab:"NE",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-6,onTimeRate:100,vetoes:0,nobudget:0,note:"Unicameral nonpartisan legislature; exceptionally reliable"},
-  {s:"Nevada",ab:"NV",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"divided",dl:"no",avgDays:5,onTimeRate:83,vetoes:0,nobudget:0,note:"Biennial system; occasional overtime sessions"},
-  {s:"New Hampshire",ab:"NH",r:"Northeast",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:12,onTimeRate:67,vetoes:1,nobudget:0,note:"No income or sales tax complicates negotiations"},
-  {s:"New Jersey",ab:"NJ",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:4,onTimeRate:67,vetoes:1,nobudget:0,note:"Near-shutdown in 2017; generally resolves by late June"},
-  {s:"New Mexico",ab:"NM",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"D",dl:"no",avgDays:-9,onTimeRate:100,vetoes:0,nobudget:0,note:"Short session; governor has strong veto; timely"},
-  {s:"New York",ab:"NY",r:"Northeast",fy:"Apr 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"yes",avgDays:68,onTimeRate:17,vetoes:0,nobudget:0,note:"Apr 1 FY start; chronic lateness improved after 2010 reforms"},
-  {s:"North Carolina",ab:"NC",r:"South",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"divided",dl:"no",avgDays:52,onTimeRate:33,vetoes:3,nobudget:2,note:"2019 & 2025: no full budget enacted; 2016 continuation law"},
-  {s:"North Dakota",ab:"ND",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-14,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time biennial legislature; consistently early"},
-  {s:"Ohio",ab:"OH",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"R",dl:"no",avgDays:22,onTimeRate:33,vetoes:0,nobudget:0,note:"Biennial budgets; frequent June–July overtime"},
-  {s:"Oklahoma",ab:"OK",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:8,onTimeRate:67,vetoes:1,nobudget:0,note:"Oil-dependent revenue makes timing unpredictable"},
-  {s:"Oregon",ab:"OR",r:"West",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"D",dl:"no",avgDays:14,onTimeRate:67,vetoes:0,nobudget:0,note:"Biennial system; occasional quorum walkouts"},
-  {s:"Pennsylvania",ab:"PA",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"yes",avgDays:112,onTimeRate:0,vetoes:1,nobudget:0,note:"Structurally late; has not enacted on time in decades"},
-  {s:"Rhode Island",ab:"RI",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:18,onTimeRate:50,vetoes:0,nobudget:0,note:"Moderate delays; small state, complex politics"},
-  {s:"South Carolina",ab:"SC",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-3,onTimeRate:100,vetoes:0,nobudget:0,note:"Reliably on time; legislature prioritizes the budget"},
-  {s:"South Dakota",ab:"SD",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-15,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time legislature; passes budget months early"},
-  {s:"Tennessee",ab:"TN",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-8,onTimeRate:100,vetoes:0,nobudget:0,note:"Consistently early; strong supermajority"},
-  {s:"Texas",ab:"TX",r:"South",fy:"Sep 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:7,onTimeRate:67,vetoes:1,nobudget:0,note:"Sep 1 FY; biennial, meets odd years only"},
-  {s:"Utah",ab:"UT",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-18,onTimeRate:100,vetoes:0,nobudget:0,note:"Passes budget in February; among earliest in the country"},
-  {s:"Vermont",ab:"VT",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"divided",dl:"no",avgDays:8,onTimeRate:67,vetoes:0,nobudget:0,note:"Small state; generally functional process"},
-  {s:"Virginia",ab:"VA",r:"South",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"D",dl:"no",avgDays:2,onTimeRate:83,vetoes:0,nobudget:0,note:"Biennial; governor has amendatory veto; usually timely"},
-  {s:"Washington",ab:"WA",r:"West",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"D",dl:"no",avgDays:9,onTimeRate:67,vetoes:0,nobudget:0,note:"Biennial system; overtime sessions common"},
-  {s:"West Virginia",ab:"WV",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:4,onTimeRate:83,vetoes:0,nobudget:0,note:"Generally functional; Republican supermajority since 2015"},
-  {s:"Wisconsin",ab:"WI",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"divided",dl:"no",avgDays:62,onTimeRate:17,vetoes:2,nobudget:0,note:"Frequent impasses; biennial budget often months late"},
-  {s:"Wyoming",ab:"WY",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-11,onTimeRate:100,vetoes:0,nobudget:0,note:"Part-time biennial legislature; oil revenue simplifies process"},
+  {s:"Alabama",ab:"AL",r:"South",fy:"Oct 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:12,onTimeRate:67,nobudget:0},
+  {s:"Alaska",ab:"AK",r:"West",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"no",avgDays:38,onTimeRate:33,nobudget:0},
+  {s:"Arizona",ab:"AZ",r:"West",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"no",avgDays:55,onTimeRate:17,nobudget:0},
+  {s:"Arkansas",ab:"AR",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:3,onTimeRate:83,nobudget:0},
+  {s:"California",ab:"CA",r:"West",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"yes",avgDays:-8,onTimeRate:83,nobudget:0},
+  {s:"Colorado",ab:"CO",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"D",dl:"no",avgDays:-5,onTimeRate:100,nobudget:0},
+  {s:"Connecticut",ab:"CT",r:"Northeast",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"D",dl:"no",avgDays:42,onTimeRate:33,nobudget:1},
+  {s:"Delaware",ab:"DE",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"D",dl:"no",avgDays:-3,onTimeRate:100,nobudget:0},
+  {s:"Florida",ab:"FL",r:"South",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"R",dl:"no",avgDays:-12,onTimeRate:100,nobudget:0},
+  {s:"Georgia",ab:"GA",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-6,onTimeRate:100,nobudget:0},
+  {s:"Hawaii",ab:"HI",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"D",dl:"no",avgDays:8,onTimeRate:67,nobudget:0},
+  {s:"Idaho",ab:"ID",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-10,onTimeRate:100,nobudget:0},
+  {s:"Illinois",ab:"IL",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:91,onTimeRate:17,nobudget:2},
+  {s:"Indiana",ab:"IN",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-4,onTimeRate:100,nobudget:0},
+  {s:"Iowa",ab:"IA",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:5,onTimeRate:67,nobudget:0},
+  {s:"Kansas",ab:"KS",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"divided",dl:"no",avgDays:18,onTimeRate:50,nobudget:0},
+  {s:"Kentucky",ab:"KY",r:"South",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"divided",dl:"no",avgDays:7,onTimeRate:67,nobudget:0},
+  {s:"Louisiana",ab:"LA",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:1,onTimeRate:83,nobudget:0},
+  {s:"Maine",ab:"ME",r:"Northeast",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"D",dl:"no",avgDays:22,onTimeRate:50,nobudget:0},
+  {s:"Maryland",ab:"MD",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:-4,onTimeRate:100,nobudget:0},
+  {s:"Massachusetts",ab:"MA",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:148,onTimeRate:0,nobudget:0},
+  {s:"Michigan",ab:"MI",r:"Midwest",fy:"Oct 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"no",avgDays:14,onTimeRate:50,nobudget:0},
+  {s:"Minnesota",ab:"MN",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"divided",dl:"no",avgDays:35,onTimeRate:33,nobudget:1},
+  {s:"Mississippi",ab:"MS",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:2,onTimeRate:83,nobudget:0},
+  {s:"Missouri",ab:"MO",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:0,onTimeRate:83,nobudget:0},
+  {s:"Montana",ab:"MT",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-8,onTimeRate:100,nobudget:0},
+  {s:"Nebraska",ab:"NE",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-6,onTimeRate:100,nobudget:0},
+  {s:"Nevada",ab:"NV",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"divided",dl:"no",avgDays:5,onTimeRate:83,nobudget:0},
+  {s:"New Hampshire",ab:"NH",r:"Northeast",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:12,onTimeRate:67,nobudget:0},
+  {s:"New Jersey",ab:"NJ",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:4,onTimeRate:67,nobudget:0},
+  {s:"New Mexico",ab:"NM",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"D",dl:"no",avgDays:-9,onTimeRate:100,nobudget:0},
+  {s:"New York",ab:"NY",r:"Northeast",fy:"Apr 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"yes",avgDays:68,onTimeRate:17,nobudget:0},
+  {s:"North Carolina",ab:"NC",r:"South",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"divided",dl:"no",avgDays:52,onTimeRate:33,nobudget:2},
+  {s:"North Dakota",ab:"ND",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-14,onTimeRate:100,nobudget:0},
+  {s:"Ohio",ab:"OH",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"R",dl:"no",avgDays:22,onTimeRate:33,nobudget:0},
+  {s:"Oklahoma",ab:"OK",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:8,onTimeRate:67,nobudget:0},
+  {s:"Oregon",ab:"OR",r:"West",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"D",dl:"no",avgDays:14,onTimeRate:67,nobudget:0},
+  {s:"Pennsylvania",ab:"PA",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"divided",dl:"yes",avgDays:112,onTimeRate:0,nobudget:0},
+  {s:"Rhode Island",ab:"RI",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"full-time",trifecta:"D",dl:"no",avgDays:18,onTimeRate:50,nobudget:0},
+  {s:"South Carolina",ab:"SC",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-3,onTimeRate:100,nobudget:0},
+  {s:"South Dakota",ab:"SD",r:"Midwest",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-15,onTimeRate:100,nobudget:0},
+  {s:"Tennessee",ab:"TN",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-8,onTimeRate:100,nobudget:0},
+  {s:"Texas",ab:"TX",r:"South",fy:"Sep 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:7,onTimeRate:67,nobudget:0},
+  {s:"Utah",ab:"UT",r:"West",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:-18,onTimeRate:100,nobudget:0},
+  {s:"Vermont",ab:"VT",r:"Northeast",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"divided",dl:"no",avgDays:8,onTimeRate:67,nobudget:0},
+  {s:"Virginia",ab:"VA",r:"South",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"D",dl:"no",avgDays:2,onTimeRate:83,nobudget:0},
+  {s:"Washington",ab:"WA",r:"West",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"D",dl:"no",avgDays:9,onTimeRate:67,nobudget:0},
+  {s:"West Virginia",ab:"WV",r:"South",fy:"Jul 1",cycle:"annual",lt:"part-time",trifecta:"R",dl:"no",avgDays:4,onTimeRate:83,nobudget:0},
+  {s:"Wisconsin",ab:"WI",r:"Midwest",fy:"Jul 1",cycle:"biennial",lt:"full-time",trifecta:"divided",dl:"no",avgDays:62,onTimeRate:17,nobudget:0},
+  {s:"Wyoming",ab:"WY",r:"West",fy:"Jul 1",cycle:"biennial",lt:"part-time",trifecta:"R",dl:"no",avgDays:-11,onTimeRate:100,nobudget:0},
 ];
 
 // One row per state per fiscal year, sourced from the cleaned budget_timing_pilot_data CSV.
@@ -2001,21 +2001,55 @@ function renderChart(data){
   });
 }
 
+// The per-state summary line used to be hand-written when this was a seeded prototype,
+// and it never got re-derived once the real dates landed. Four of the fifty ended up
+// flatly contradicting their own numbers — Arizona and Kansas described "persistent" and
+// "recurring late budgets" for states with a 0% miss rate, and Alabama read "mild late
+// tendency" above a perfect record. Generating the sentence from the record is the only
+// version that cannot drift.
+function stateNote(name){
+  const recs=(BY_STATE[name]||[]).filter(r=>!r.carryover);
+  if(!recs.length)return'No tracked budget years.';
+  const dated=recs.filter(r=>r.enacted&&r.daysLate!==null).map(r=>r.daysLate).sort((a,b)=>a-b);
+  const missed=recs.filter(r=>!r.enacted||r.daysLate===null||r.daysLate>0).length;
+  const none=recs.filter(r=>!r.enacted);
+  const med=dated.length?dated[Math.floor(dated.length/2)]:null;
+  const typical=med===null?''
+    :med<=0?` Typically ${Math.abs(med)} days before the fiscal year starts.`
+           :` Typically ${med} days after it starts.`;
+  let lead;
+  if(missed===0)      lead=`Made its deadline in all ${recs.length} tracked years.`;
+  else if(missed===recs.length) lead=`Missed its deadline in all ${recs.length} tracked years.`;
+  else                lead=`Missed ${missed} of ${recs.length} tracked years.`;
+  const noBudget=none.length
+    ? ` ${none.length} fiscal ${none.length===1?'year':'years'} began with no enacted budget `+
+      `(${none.map(r=>r.fy).join(', ')}).` : '';
+  const carry=(BY_STATE[name]||[]).filter(r=>r.carryover).length;
+  const bien=carry?` ${carry} further ${carry===1?'year is':'years are'} covered by a two-year `+
+    `budget enacted in a previous session.`:'';
+  return lead+typical+noBudget+bien;
+}
+
 function showDetail(state){
   document.getElementById('detail-empty').style.display='none';
   const d=document.getElementById('detail-content');
   d.style.display='block';
+  const recs=(BY_STATE[state.s]||[]).filter(r=>!r.carryover);
+  const yrs=recs.map(r=>r.year);
+  const span=yrs.length?`FY${Math.min(...yrs)}–FY${Math.max(...yrs)}`:'';
+  const last=[...recs].reverse().find(r=>r.enacted&&r.daysLate!==null);
   d.innerHTML=`
     <div class="detail-state">${state.s}</div>
     <div class="detail-meta">${state.r} · ${state.cycle} budget<br>Fiscal year starts ${state.fy}</div>
     ${badge(state.avgDays,state.nobudget)}
     <div class="detail-rows">
-      <div class="detail-row"><span class="detail-key">Avg days past FY start</span><span class="detail-val">${state.avgDays<=0?state.avgDays+' (on time)':'+'+state.avgDays}</span></div>
-      <div class="detail-row"><span class="detail-key">On-time rate (2019–24)</span><span class="detail-val">${state.onTimeRate}%</span></div>
-      <div class="detail-row"><span class="detail-key">Budget vetoes</span><span class="detail-val">${state.vetoes}</span></div>
+      <div class="detail-row"><span class="detail-key">Avg days vs FY start</span><span class="detail-val">${state.avgDays<=0?state.avgDays+' (early)':'+'+state.avgDays}</span></div>
+      <div class="detail-row"><span class="detail-key">On-time rate (${span})</span><span class="detail-val">${state.onTimeRate}%</span></div>
+      <div class="detail-row"><span class="detail-key">Budget-years tracked</span><span class="detail-val">${recs.length}</span></div>
       <div class="detail-row"><span class="detail-key">No-budget years</span><span class="detail-val">${state.nobudget}</span></div>
+      ${last?`<div class="detail-row"><span class="detail-key">Most recent enacted</span><span class="detail-val">${last.fy} · ${fmtDate(last.signed)}</span></div>`:''}
     </div>
-    <div class="detail-note">${state.note}</div>
+    <div class="detail-note">${stateNote(state.s)}</div>
   `;
 }
 
