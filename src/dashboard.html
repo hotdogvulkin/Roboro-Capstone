@@ -161,6 +161,9 @@ select:hover{border-color:#6E6A99}
 .wl-covered b{color:#C9C2DB;font-weight:600}
 .wl-val{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:2px 0 22px}
 
+.lede{margin-top:16px;padding:14px 18px;background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E60058;border-radius:9px;font-size:13.5px;line-height:1.65;color:#C9C2DB;max-width:820px}
+.lede b{color:#F2EEF7;font-weight:600}
+.asof{margin-top:9px;font-size:11px;color:#6E6A99}
 /* ---- Open questions ----------------------------------------------------- */
 .oq-q{background:#150C28;border:1px solid #2D1B4E;border-left:3px solid #E60058;border-radius:9px;padding:15px 17px;margin-bottom:11px}
 .oq-q .oq-num{font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6E6A99;margin-bottom:6px}
@@ -275,6 +278,8 @@ select:hover{border-color:#6E6A99}
   <div class="hero">
     <h1>State Budget Timing — All 50 States</h1>
     <p>How late (or early) does each state enact its budget relative to its fiscal year start date? Filter, compare, and explore patterns across the country — powered by Roboro legislative data.</p>
+    <div class="lede" id="hero-lede"></div>
+    <div class="asof" id="hero-asof"></div>
   </div>
 
   <div class="controls">
@@ -964,6 +969,43 @@ function renderOverrun(){
     `do with budgets — are in budget_timing_predictive_analysis.py.`;
 }
 
+// The date this dataset was last compiled against sources. Every "not enacted" row is a
+// statement about the world on this date, not a permanent fact, so it is shown wherever
+// one appears rather than left for the reader to infer.
+const DATA_THROUGH='August 2026';
+
+// The page used to open on "ON TIME — 42 of 50 states", which reads as "most states are
+// fine" and is close to the opposite of what the analysis found. The conclusion goes
+// above the fold instead, computed so it cannot drift from the panel underneath it.
+function renderHero(){
+  const per={};
+  Object.keys(BY_STATE).forEach(st=>{
+    const v=BY_STATE[st].filter(r=>!r.carryover);
+    per[st]=v.filter(r=>!r.enacted||r.daysLate===null||r.daysLate>0).length/v.length;
+  });
+  const never=Object.values(per).filter(v=>v===0).length;
+  const chronic=Object.values(per).filter(v=>v>0.5).length;
+  const latestFy=Math.max(...TIMELINE.map(t=>t.year));
+  const openNow=Object.keys(BY_STATE).filter(st=>
+    BY_STATE[st].some(r=>r.year===latestFy&&!r.carryover&&!r.enacted));
+  const v=validate(.5);
+
+  document.getElementById('hero-lede').innerHTML=
+    `<b>Budget lateness is not spreading — it is concentrated, and it is forecastable.</b> `+
+    `${never} of the ${Object.keys(per).length} states have never missed a deadline in this `+
+    `dataset, while ${chronic} miss more often than not. The national rate has been flat for `+
+    `a decade. Because the difference is between states rather than between years, a state's `+
+    `own record predicts its next miss at <b>${(100*v.precision).toFixed(0)}% precision, `+
+    `${(v.precision/v.base).toFixed(1)}× the base rate</b> — a year before the session opens.`;
+
+  document.getElementById('hero-asof').textContent=
+    `Data current through ${DATA_THROUGH}. `+
+    (openNow.length
+      ? `${openNow.length} states had no enacted FY${latestFy} budget as of that date `+
+        `(${openNow.map(s=>ABBR[s]||s).sort().join(', ')}).`
+      : `All states had enacted an FY${latestFy} budget as of that date.`);
+}
+
 // ---------------------------------------------------------------------------
 // OPEN QUESTIONS — the parts of this the data raises and cannot settle.
 //
@@ -1644,7 +1686,13 @@ function renderHeatmap(groups){
       const rec=byYear[y];
       if(!rec)return`<td class="cell cell-empty"></td>`;
       if(!rec.enacted||rec.daysLate===null){
-        return`<td class="cell cell-unenacted" data-state="${g.name}" data-fy="${rec.fy}" tabindex="0" title="${g.name} ${rec.fy}: not yet enacted"></td>`;
+        // "as of" belongs only on the fiscal year still in progress. FY2020 will never
+        // acquire a budget now, so dating it invites the reader to think it might.
+        const openYear=rec.year===Math.max(...TIMELINE.map(t=>t.year));
+        const tipU=openYear
+          ?`${g.name} ${rec.fy}: no budget enacted as of ${DATA_THROUGH}`
+          :`${g.name} ${rec.fy}: the fiscal year ended with no budget enacted`;
+        return`<td class="cell cell-unenacted" data-state="${g.name}" data-fy="${rec.fy}" tabindex="0" title="${tipU}"></td>`;
       }
       const label=rec.daysLate<=0?`${rec.daysLate}d`:`+${rec.daysLate}d`;
       const isEstimate=rec.precision==='month-level estimate';
@@ -1660,7 +1708,7 @@ function renderHeatmap(groups){
         ?`${g.name} ${rec.fy}: ${growthPct>=0?'+':''}${growthPct.toFixed(0)}% per-capita spending growth (FY2015→FY2024${spendingUnit==='real'?', real 2024$':''})${est}`
         :isCarry
           ?`${g.name} ${rec.fy}: biennial carryover — enacted ${fmtDate(rec.signed)} during the FY${rec.year-1} budget session${est}`
-          :`${g.name} ${rec.fy}: ${label}${est}`;
+            :`${g.name} ${rec.fy}: ${label}${est}`;
       const cls=['cell'];
       if(isEstimate)cls.push('cell-estimate');
       if(isCarry){cls.push('cell-carryover');if(!isSpendMode)cls.push('carryover-fill')}
@@ -2142,6 +2190,7 @@ document.getElementById('heatmap-sort-filter').addEventListener('change',()=>{up
     `${OVERRUN.length} sittings.`;
 })();
 
+renderHero();
 renderTrendStats();
 renderOntimeTrend();
 // Drive the initial paint through setMode rather than a bare refresh(), so the landing view
