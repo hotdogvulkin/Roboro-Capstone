@@ -70,6 +70,8 @@ select:hover{border-color:#6E6A99}
 .mode-btn{background:transparent;border:none;color:#9B93B5;font-size:12px;font-family:inherit;font-weight:500;padding:6px 14px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
 .mode-btn:hover{color:#F2EEF7}
 .mode-btn.active{background:#E60058;color:#fff}
+#color-timing.active{background:#E60058}
+#color-spending.active{background:#7C3AED}
 
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
 .trend-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
@@ -2204,6 +2206,11 @@ const SORT_LABELS={
 function updateTrendChrome(){
   const isSpend=colorMode==='spending';
   const sortMode=document.getElementById('heatmap-sort-filter').value;
+  if(mode==='trend'){
+    document.getElementById('chart-title-text').textContent=isSpend
+      ?'Per-capita spending growth by state, FY2015→FY2024'
+      :`Days late by fiscal year, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]}`;
+  }
   document.getElementById('trend-legend').style.display=mode==='trend'&&!isSpend?'flex':'none';
   document.getElementById('spend-legend').style.display=mode==='trend'&&isSpend?'flex':'none';
   const gLo=currentGrowthMin(),gHi=currentGrowthMax();
@@ -2212,8 +2219,8 @@ function updateTrendChrome(){
   document.getElementById('chart-sub-text').textContent=mode!=='trend'
     ?'Below zero = enacted before the fiscal year began. Click any bar to see state detail.'
     :isSpend
-      ?`Each row is shaded by per-capita spending growth, FY2015→FY2024 (darker = faster growth), ${SORT_LABELS[sortMode]}.`
-      :`Each cell is one fiscal year, colored by days late. Hatched = not yet enacted, ${SORT_LABELS[sortMode]}.`;
+      ?`One figure per state, not per year — the whole row shares its FY2015→FY2024 growth (darker = faster). Year columns show the state's tracked span only. ${SORT_LABELS[sortMode]}.`
+      :`One value per cell — each is a single fiscal year, shaded by how late that year's budget was. Hatched = never enacted. ${SORT_LABELS[sortMode]}.`;
 }
 
 function setColorMode(m){
@@ -2270,8 +2277,12 @@ function setMode(m){
     :isSess?`The signal that moves while the budget is still in play`
     :isOpen?'What we still don’t know'
     :m==='findings'?'What predicts a late budget?'
-    :`Days late by fiscal year, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]} — all 50 states`;
+    :`Days late by fiscal year, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]}`;
   document.getElementById('chart-sub-text').style.display=isFind?'none':'block';
+  if(m!=='snapshot'){
+    const n=document.getElementById('chart-note');
+    if(n)n.style.display='none';
+  }
   if(m==='findings')renderFindings();
   if(isWatch)renderWatchlist();
   if(isSess)renderOverrun();
