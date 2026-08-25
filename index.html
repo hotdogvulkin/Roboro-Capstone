@@ -2048,7 +2048,7 @@ function updateMetrics(data){
     ? data.reduce((a,s)=>a+(s.tracked||0),0)
     : plotted.length;
   document.getElementById('metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">On time</div><div class="metric-val">${ontime}</div><div class="metric-sub">of ${plotted.length} ${yr===null?'states shown':'that wrote an FY'+yr+' budget'}</div></div>
+    <div class="metric"><div class="metric-label">${yr===null?'States on time on average':'States on time'}</div><div class="metric-val">${ontime} of ${plotted.length}</div><div class="metric-sub">${yr===null?'all '+plotted.length+' are shown in the chart below':'of those that wrote an FY'+yr+' budget'}</div></div>
     <div class="metric"><div class="metric-label">Avg days late</div><div class="metric-val">${avgLate}</div><div class="metric-sub">among late states only</div></div>
     <div class="metric"><div class="metric-label">No-budget ${yr===null?'years':'states'}</div><div class="metric-val">${noBudget}</div><div class="metric-sub">${yr===null?'states with ≥1 on record':'entered FY'+yr+' with none enacted'}</div></div>
     <div class="metric"><div class="metric-label">${yr===null?'Budget-years tracked':'Budgets decided'}</div><div class="metric-val">${tracked}</div><div class="metric-sub">${yr===null?'budgets written by the states shown<br>(two-year carryovers excluded)':'states that actually wrote one in FY'+yr}</div></div>
