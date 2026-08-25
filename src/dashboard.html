@@ -2184,7 +2184,7 @@ function updateTrendChrome(){
   document.getElementById('chart-sub-text').textContent=mode!=='trend'
     ?'Below zero = enacted before the fiscal year began. Click any bar to see state detail.'
     :isSpend
-      ?`One figure per state, not per year — the whole row shares its FY2015→FY2024 growth (darker = faster). Year columns show the state's tracked span only. ${SORT_LABELS[sortMode]}.`
+      ?`One figure per state, not per year — the whole row shares its FY2015→FY2024 growth (darker = faster). Year columns show the state's tracked span only. Read the extremes with care: this series stitches three sources (Tax Policy Center to FY2021, Census FY2023, KFF/NASBO FY2024), and a few states move sharply at the FY2023→FY2024 seam — Arizona's +165% is largely that break, not spending. ${SORT_LABELS[sortMode]}.`
       :`One value per cell — each is a single fiscal year, shaded by how late that year's budget was. Hatched = never enacted. ${SORT_LABELS[sortMode]}.`;
 }
 
