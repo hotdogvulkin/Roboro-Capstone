@@ -70,8 +70,6 @@ select:hover{border-color:#6E6A99}
 .mode-btn{background:transparent;border:none;color:#9B93B5;font-size:12px;font-family:inherit;font-weight:500;padding:6px 14px;border-radius:6px;cursor:pointer;transition:background .15s,color .15s}
 .mode-btn:hover{color:#F2EEF7}
 .mode-btn.active{background:#E60058;color:#fff}
-#color-timing.active{background:#E60058}
-#color-spending.active{background:#7C3AED}
 
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
 .trend-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
@@ -400,12 +398,6 @@ select:hover{border-color:#6E6A99}
           <div class="leg-item"><div class="leg-dot heat-swatch hatched"></div>Not yet enacted</div>
           <div class="leg-item"><div class="precision-swatch carryover" style="width:10px;height:10px;border-radius:2px"></div>Biennial carryover</div>
         </div>
-        <div class="legend heat-legend" id="spend-legend" style="display:none">
-          <span id="spend-legend-lo">Slower growth</span>
-          <div class="heat-scale spend-scale"></div>
-          <span id="spend-legend-hi">Faster growth</span>
-          <div class="leg-item"><div class="leg-dot heat-swatch hatched"></div>Not yet enacted</div>
-        </div>
       </div>
       <div class="trend-stats-grid" id="trend-stats" style="display:none">
         <div class="metric">
@@ -435,20 +427,11 @@ select:hover{border-color:#6E6A99}
         <div class="metric-sub" id="ontime-hook-line" style="margin-top:6px"></div>
       </div>
       <div class="controls" id="heatmap-controls" style="display:none;margin-bottom:12px">
-        <div class="ctrl-group" id="color-mode-toggle">
-          <label>Color by</label>
-          <div class="mode-toggle">
-            <button class="mode-btn active" id="color-timing" type="button">Timing</button>
-            <button class="mode-btn" id="color-spending" type="button">Spending</button>
-          </div>
-        </div>
-        <div class="divider"></div>
         <div class="ctrl-group">
           <label>Sort by</label>
           <select id="heatmap-sort-filter">
             <option value="recent">Most late (current year)</option>
             <option value="change">Worst 10-year change</option>
-            <option value="spending">Highest per-capita spending</option>
             <option value="alpha">Alphabetical</option>
           </select>
         </div>
@@ -706,12 +689,7 @@ function spendColor(perCapita){
   return blueGradient((perCapita-PERCAPITA_MIN)/(PERCAPITA_MAX-PERCAPITA_MIN));
 }
 
-function growthColor(pct){
-  const lo=currentGrowthMin(),hi=currentGrowthMax();
-  return blueGradient((pct-lo)/(hi-lo));
-}
 
-let colorMode='timing';
 
 // National on-time rate per fiscal year, computed live from TIMELINE.
 //
@@ -1724,7 +1702,6 @@ function renderHeatmap(groups){
     g.recs.forEach(r=>byYear[r.year]=r);
     const rowSub=rowSubLabel(g,sortMode);
     const growthPct=currentGrowth(g.name);
-    const rowSpendColor=growthPct!==undefined?growthColor(growthPct):null;
     const cells=YEARS.map(y=>{
       const rec=byYear[y];
       if(!rec)return`<td class="cell cell-empty"></td>`;
@@ -1741,20 +1718,17 @@ function renderHeatmap(groups){
       const isEstimate=rec.precision==='month-level estimate';
       const est=isEstimate?' (month-level est.)':'';
       const isCarry=rec.carryover;
-      const isSpendMode=colorMode==='spending'&&rowSpendColor;
       // Carryovers leave the timing gradient entirely: a -443d value is accurate
       // but not comparable to a same-year enactment, so it shouldn't read as
       // "extremely early" on the crimson scale. In spending mode the fill still
       // encodes spending, but the "B" badge stays so the row remains identifiable.
-      const bg=isSpendMode?rowSpendColor:(isCarry?'':heatColor(rec.daysLate));
-      const tip=isSpendMode
-        ?`${g.name} ${rec.fy}: ${growthPct>=0?'+':''}${growthPct.toFixed(0)}% per-capita spending growth (FY2015→FY2024${spendingUnit==='real'?', real 2024$':''})${est}`
-        :isCarry
+      const bg=isCarry?'':heatColor(rec.daysLate);
+      const tip=isCarry
           ?`${g.name} ${rec.fy}: biennial carryover — enacted ${fmtDate(rec.signed)} during the FY${rec.year-1} budget session${est}`
             :`${g.name} ${rec.fy}: ${label}${est}`;
       const cls=['cell'];
       if(isEstimate)cls.push('cell-estimate');
-      if(isCarry){cls.push('cell-carryover');if(!isSpendMode)cls.push('carryover-fill')}
+      if(isCarry){cls.push('cell-carryover');cls.push('carryover-fill')}
       return`<td class="${cls.join(' ')}"${bg?` style="background:${bg}"`:''} data-state="${g.name}" data-fy="${rec.fy}" tabindex="0" title="${tip}"></td>`;
     }).join('');
     return`<tr><th class="row-label" data-state="${g.name}" tabindex="0" title="Click for ${g.name}'s full timeline">${g.name}<span class="row-sub">${rowSub}</span></th>${cells}</tr>`;
@@ -2204,38 +2178,22 @@ const SORT_LABELS={
 };
 
 function updateTrendChrome(){
-  const isSpend=colorMode==='spending';
   const sortMode=document.getElementById('heatmap-sort-filter').value;
   if(mode==='trend'){
-    document.getElementById('chart-title-text').textContent=isSpend
-      ?'Per-capita spending growth by state, FY2015→FY2024'
-      :`Days late by fiscal year, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]}`;
+    document.getElementById('chart-title-text').textContent=
+      `Days late by fiscal year, FY${YEARS[0]}–FY${YEARS[YEARS.length-1]}`;
   }
-  document.getElementById('trend-legend').style.display=mode==='trend'&&!isSpend?'flex':'none';
-  document.getElementById('spend-legend').style.display=mode==='trend'&&isSpend?'flex':'none';
-  const gLo=currentGrowthMin(),gHi=currentGrowthMax();
-  document.getElementById('spend-legend-lo').textContent=`${gLo>=0?'+':''}${Math.round(gLo)}%`;
-  document.getElementById('spend-legend-hi').textContent=`${gHi>=0?'+':''}${Math.round(gHi)}%`;
+  document.getElementById('trend-legend').style.display=mode==='trend'?'flex':'none';
   document.getElementById('chart-sub-text').textContent=mode!=='trend'
     ?'Below zero = enacted before the fiscal year began. Click any bar to see state detail.'
-    :isSpend
-      ?`One figure per state, not per year — the whole row shares its FY2015→FY2024 growth (darker = faster). Year columns show the state's tracked span only. Read the extremes with care: this series stitches three sources (Tax Policy Center to FY2021, Census FY2023, KFF/NASBO FY2024), and a few states move sharply at the FY2023→FY2024 seam — Arizona's +165% is largely that break, not spending. ${SORT_LABELS[sortMode]}.`
-      :`One value per cell — each is a single fiscal year, shaded by how late that year's budget was. Hatched = never enacted. ${SORT_LABELS[sortMode]}.`;
+    :`One value per cell — each is a single fiscal year, shaded by how late that year's budget was. Hatched = never enacted. ${SORT_LABELS[sortMode]}.`;
 }
 
-function setColorMode(m){
-  colorMode=m;
-  document.getElementById('color-timing').classList.toggle('active',m==='timing');
-  document.getElementById('color-spending').classList.toggle('active',m==='spending');
-  updateTrendChrome();
-  if(mode==='trend')renderHeatmap(getFilteredTrend());
-}
 
 function setSpendingUnit(u){
   spendingUnit=u;
   renderTrendStats();
   updateTrendChrome();
-  if(mode==='trend'&&colorMode==='spending')renderHeatmap(getFilteredTrend());
   if(currentDetailState)showStateDetail(currentDetailState);
 }
 
@@ -2302,8 +2260,6 @@ document.getElementById('mode-watchlist').addEventListener('click',()=>setMode('
 document.getElementById('mode-sessions').addEventListener('click',()=>setMode('sessions'));
 document.getElementById('mode-findings').addEventListener('click',()=>setMode('findings'));
 document.getElementById('mode-open').addEventListener('click',()=>setMode('open'));
-document.getElementById('color-timing').addEventListener('click',()=>setColorMode('timing'));
-document.getElementById('color-spending').addEventListener('click',()=>setColorMode('spending'));
 document.getElementById('heatmap-sort-filter').addEventListener('change',()=>{updateTrendChrome();refresh();});
 // The footer used to read "data is seeded for demonstration". That stopped being true a
 // while ago and was actively undercutting the page — every figure here traces to a primary
